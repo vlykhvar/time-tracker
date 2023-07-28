@@ -1,24 +1,23 @@
 package com.svbd.svbd;
 
-import com.svbd.svbd.settings.H2Embedded;
+import com.svbd.svbd.settings.DatabaseModule;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class Application extends javafx.application.Application {
+import static com.svbd.svbd.Pages.MAIN_PAGE;
 
-    H2Embedded db = new H2Embedded();
+public class Application extends javafx.application.Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource("mainPage.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(MAIN_PAGE.getPagePath()));
         Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
         stage.setTitle("SVBD");
         stage.setScene(scene);
         stage.show();
-        db.connection();
     }
 
     public static void main(String[] args) {

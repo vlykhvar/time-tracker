@@ -1,1 +1,2 @@
-CREATE TABLE Employees(employee_id bigint NOT NULL PRIMARY KEY AUTO_INCREMENT, name varchar NOT NULL, phone_number varchar, an_hour NUMERIC(10, 2) NOT NULL);
+CREATE TABLE IF NOT EXISTS Employee(employee_id bigint NOT NULL PRIMARY KEY AUTO_INCREMENT, name varchar NOT NULL, phone_number varchar, CREATE_AT DATE, REMOVED_AT DATE);
+CREATE TABLE IF NOT EXISTS Salary(salary_id bigint NOT NULL PRIMARY KEY AUTO_INCREMENT, an_hour NUMERIC(10, 2) NOT NULL, startDate DATE, endDate DATE, employee_id bigint NOT NULL, FOREIGN KEY(employee_id) REFERENCES Employee(employee_id));
