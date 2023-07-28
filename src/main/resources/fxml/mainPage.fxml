@@ -32,13 +32,16 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
 <VBox prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.MainPageController">
   
@@ -63,13 +66,20 @@
       </menus>
     </MenuBar>
     <AnchorPane fx:id="anchorPane" VBox.vgrow="ALWAYS">
-      <children>
-        <Label alignment="CENTER" layoutX="155.0" layoutY="177.0" style="&#10;" text="Drag components from Library here…" textAlignment="CENTER" textFill="#9f9f9f">
-          <font>
-            <Font size="18.0" />
-          </font>
-        </Label>
-      </children>
+         <children>
+            <Button fx:id="saveButton" layoutX="1028.0" layoutY="620.0" mnemonicParsing="false" onAction="#saveShift" prefHeight="26.0" prefWidth="142.0" text="Зберегти" AnchorPane.bottomAnchor="47.99999999999998" AnchorPane.leftAnchor="1028.0" AnchorPane.rightAnchor="109.6" AnchorPane.topAnchor="620.0" />
+            <DatePicker fx:id="datePicker" layoutX="115.0" layoutY="14.0" AnchorPane.bottomAnchor="654.8" AnchorPane.leftAnchor="115.0" AnchorPane.rightAnchor="989.8" AnchorPane.topAnchor="14.0" />
+            <TableView fx:id="shitEmployeeData" editable="true" layoutX="335.0" layoutY="54.0" prefHeight="502.0" prefWidth="918.0" AnchorPane.bottomAnchor="138.0" AnchorPane.rightAnchor="26.59999999999991" AnchorPane.topAnchor="54.0">
+              <columns>
+                <TableColumn fx:id="employeeName" prefWidth="184.800048828125" resizable="false" text="Працівник" />
+                <TableColumn fx:id="startEmployeeShift" minWidth="0.0" prefWidth="170.4000244140625" resizable="false" text="Початок" />
+                  <TableColumn fx:id="endEmployeeShift" minWidth="8.0" prefWidth="190.4000244140625" resizable="false" text="Кінець" />
+                  <TableColumn fx:id="employeeId" editable="false" minWidth="8.0" prefWidth="190.4000244140625" resizable="false" sortable="false" text="employeeId" visible="false" />
+                  <TableColumn fx:id="shiftRowId" editable="false" minWidth="8.0" prefWidth="190.4000244140625" resizable="false" sortable="false" text="shiftRowId" visible="false" />
+              </columns>
+            </TableView>
+            <Label layoutX="15.0" layoutY="18.0" prefHeight="18.0" prefWidth="89.0" text="Дата зміни" AnchorPane.bottomAnchor="658.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="1175.4" AnchorPane.topAnchor="18.0" />
+         </children>
     </AnchorPane>
   </children>
 </VBox>

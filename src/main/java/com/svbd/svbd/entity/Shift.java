@@ -10,22 +10,17 @@ import java.util.List;
 public class Shift {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "shift_id")
-    private Long id;
-
-    @Column(name = "shift_date")
+    @Column(name = "shift_date", nullable = false)
     private LocalDate shiftDate;
 
-    @OneToMany(mappedBy = "shift")
+    @OneToMany(mappedBy = "shift", cascade = CascadeType.ALL)
     private List<ShiftRow> shiftRows = new ArrayList<>();
 
-    public Long getId() {
-        return id;
+    public Shift() {
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Shift(LocalDate shiftDate) {
+        this.shiftDate = shiftDate;
     }
 
     public LocalDate getShiftDate() {

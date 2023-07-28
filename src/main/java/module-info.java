@@ -9,13 +9,18 @@ module com.svbd.svbd {
     requires java.sql;
     requires org.hibernate.orm.core;
     requires jakarta.persistence;
+    requires jakarta.activation;
     requires java.naming;
 
     opens com.svbd.svbd to javafx.fxml;
     opens com.svbd.svbd.controller to javafx.fxml;
     opens com.svbd.svbd.entity to org.hibernate.orm.core, javafx.base;
+    opens com.svbd.svbd.dto.employee to javafx.base;
+    opens com.svbd.svbd.dto.shift.row to javafx.base;
 
     exports com.svbd.svbd;
     exports com.svbd.svbd.settings;
     exports com.svbd.svbd.controller;
+    exports com.svbd.svbd.enums;
+    opens com.svbd.svbd.enums to javafx.fxml;
 }

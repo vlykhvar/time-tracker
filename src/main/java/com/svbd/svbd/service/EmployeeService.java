@@ -10,11 +10,19 @@ public class EmployeeService {
 
     private EmployeeDaoImpl repository = new EmployeeDaoImpl();
 
-    public Long createEmployee(Employee employee) throws SQLException {
+    public Long createEmployee(Employee employee) {
         return repository.createEmployee(employee);
+    }
+
+    public void removeById(Long employeeId) {
+        repository.removeById(employeeId);
     }
 
     public List<Employee> getAllEmployee() {
         return repository.findAll();
+    }
+
+    public List<Employee> findAllWithLastSalary() {
+        return repository.findAllWithLastSalary();
     }
 }

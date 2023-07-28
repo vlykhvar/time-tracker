@@ -7,7 +7,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
-public class Salary {
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public class Salary extends CreatedAtRemovedAt {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -16,12 +17,6 @@ public class Salary {
 
     @Column(name = "AN_HOUR")
     private BigDecimal anHour;
-
-    @Column(name = "STARTDATE")
-    private LocalDate startDate;
-
-    @Column(name = "ENDDATE")
-    private LocalDate endDate;
 
     @ManyToOne
     @JoinColumn(name = "EMPLOYEE_ID", referencedColumnName = "EMPLOYEE_ID")
@@ -43,22 +38,6 @@ public class Salary {
         this.anHour = anHour;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
     public Employee getEmployee() {
         return employee;
     }
@@ -77,12 +56,11 @@ public class Salary {
         }
         Salary salary = (Salary) o;
         return Objects.equals(salaryId, salary.salaryId) && Objects.equals(employee, salary.employee) &&
-                Objects.equals(anHour, salary.anHour) && Objects.equals(startDate, salary.endDate) &&
-                Objects.equals(endDate, salary.endDate);
+                Objects.equals(anHour, salary.anHour);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(salaryId, anHour, startDate, endDate, employee);
+        return Objects.hash(salaryId, anHour, employee);
     }
 }
