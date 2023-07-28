@@ -4,9 +4,12 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-public class H2Embedded {
+public class DatabaseModule {
 
     private static final String URL = "jdbc:h2:~/svbd";
 
@@ -21,23 +24,7 @@ public class H2Embedded {
         }
     }
 
-    public void insertQuery(String query) throws SQLException {
-        Connection connection = DriverManager.getConnection(URL);
-        System.out.println("connected");
-        Statement stmt = connection.createStatement();
-        stmt.executeUpdate(query);
-        connection.close();
-    }
-
-    public ResultSet getQuery(String query) throws SQLException {
-        Connection connection = DriverManager.getConnection(URL);
-        Statement stmt = connection.createStatement();
-        var result = stmt.executeQuery(query);
-        connection.close();
-        return result;
-    }
-
-    public void createTables(Connection connection) throws URISyntaxException {
+    private void createTables(Connection connection) throws URISyntaxException {
         URL res = getClass().getClassLoader().getResource("sql");
         File file = Paths.get(res.toURI()).toFile();
         String absolutePath = file.getAbsolutePath();

@@ -1,17 +1,19 @@
-package com.svbd.svbd;
+package com.svbd.svbd.controller;
 
-import com.svbd.svbd.service.EmployeeService;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 
-import java.sql.SQLException;
+
+import static com.svbd.svbd.Pages.TABLE_EMPLOYEE;
 
 public class MainPageController {
-
-    private EmployeeService employeeService = new EmployeeService();
 
     @FXML
     private MenuItem about;
@@ -39,9 +41,12 @@ public class MainPageController {
     @FXML
     void showEmployeeScene(ActionEvent event) {
         try {
-            employeeService.createEmployee();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(TABLE_EMPLOYEE.getPagePath()));
+            Stage stage = new Stage();
+            stage.setScene(new Scene(fxmlLoader.load()));
+            stage.show();
+        } catch (Exception  e) {
+            e.printStackTrace();
         }
     }
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="553.0" prefWidth="602.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.EmployeeTableController">
+   <children>
+      <TableView fx:id="emploeeTable" layoutY="7.0" prefHeight="472.0" prefWidth="602.0">
+        <columns>
+          <TableColumn fx:id="idCollumn" editable="false" prefWidth="75.0" text="ID" />
+          <TableColumn fx:id="fullnameCollumn" editable="false" prefWidth="75.0" text="ПІБ" />
+            <TableColumn fx:id="phoneNumberColumn" editable="false" prefWidth="124.79998779296875" text="Номер телефону" />
+            <TableColumn fx:id="perHourColumn" editable="false" prefWidth="124.79998779296875" text="ЗП в час" />
+        </columns>
+      </TableView>
+      <Button id="newEmploeeButton" fx:id="buttonId" layoutX="200.0" layoutY="493.0" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="202.0" text="Новий співробітник" />
+   </children>
+</AnchorPane>
