@@ -1,8 +1,12 @@
 package com.svbd.svbd.dao.salary;
 
+import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.entity.Salary;
 import com.svbd.svbd.settings.HibernateModule;
 import org.hibernate.HibernateException;
+
+import java.util.Collection;
+import java.util.List;
 
 public class SalaryDaoImpl {
 
@@ -20,5 +24,10 @@ public class SalaryDaoImpl {
             session.close();
             throw new HibernateException(e);
         }
+    }
+
+    public List<Salary> findAllByEmployeeIdsAndEndDateIsNull(Collection<Long> employeeIds) {
+        var session = HibernateModule.getSessionFactory().openSession();
+        return session.createQuery("SELECT s FROM Salary s JOIN FETCH s.employee WHERE s.removedAt IS NULL", Salary.class).getResultList();
     }
 }

@@ -19,7 +19,7 @@ public class ShiftRow {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "shift_id", referencedColumnName = "shift_id")
+    @JoinColumn(name = "shift_date", referencedColumnName = "shift_date")
     private Shift shift;
 
     @ManyToOne

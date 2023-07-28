@@ -1,25 +1,29 @@
 package com.svbd.svbd.controller;
 
+import com.svbd.svbd.enums.Pages;
 import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.entity.Salary;
-import com.svbd.svbd.service.EmployeeService;
-import com.svbd.svbd.service.SalaryService;
+import com.svbd.svbd.service.EmployeeManagementService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.time.LocalDate;
+
+import static com.svbd.svbd.util.StageUtil.changeStage;
 
 public class EmployeeController {
 
-    private EmployeeService employeeService = new EmployeeService();
-    private SalaryService salaryService = new SalaryService();
+    private EmployeeManagementService employeeManagementService = new EmployeeManagementService();
 
     @FXML
     private AnchorPane anchorPane;
@@ -40,21 +44,18 @@ public class EmployeeController {
     private Button saveButton;
 
     @FXML
-    void saveEmployee(ActionEvent event) throws SQLException {
+    void saveEmployee(ActionEvent event) throws SQLException, IOException {
         var employee = new Employee();
         employee.setName(fullName.getText());
         employee.setPhoneNumber(phoneNumber.getText());
         var salary = new Salary();
-        salary.setStartDate(LocalDate.now());
         try {
             salary.setAnHour(new BigDecimal(perHour.getText()));
         } catch (NumberFormatException e) {
             throw new NumberFormatException();
         }
-        var employeeId = employeeService.createEmployee(employee);
-        salary.setEmployee(new Employee(employeeId));
-        salaryService.createSalary(salary);
-        Stage stage = (Stage) anchorPane.getScene().getWindow();
-        stage.close();
+        employee.getSalaries().add(salary);
+        employeeManagementService.createEmployee(employee);
+        changeStage((Stage) anchorPane.getScene().getWindow(), Pages.TABLE_EMPLOYEE);
     }
 }

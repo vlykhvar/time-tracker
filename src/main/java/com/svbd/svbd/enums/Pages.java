@@ -1,4 +1,4 @@
-package com.svbd.svbd;
+package com.svbd.svbd.enums;
 
 public enum Pages {
 

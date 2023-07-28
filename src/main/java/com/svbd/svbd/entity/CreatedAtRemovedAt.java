@@ -1,12 +1,11 @@
 package com.svbd.svbd.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.MappedSuperclass;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Embeddable
+@MappedSuperclass
 public abstract class CreatedAtRemovedAt {
 
     @Column(name = "CREATE_AT")
