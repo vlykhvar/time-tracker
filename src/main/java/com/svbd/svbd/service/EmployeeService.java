@@ -1,14 +1,13 @@
 package com.svbd.svbd.service;
 
-import com.svbd.svbd.dao.employee.EmployeeDaoImpl;
+import com.svbd.svbd.repository.employee.EmployeeRepository;
 import com.svbd.svbd.entity.Employee;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class EmployeeService {
 
-    private EmployeeDaoImpl repository = new EmployeeDaoImpl();
+    private EmployeeRepository repository = new EmployeeRepository();
 
     public Long createEmployee(Employee employee) {
         return repository.createEmployee(employee);

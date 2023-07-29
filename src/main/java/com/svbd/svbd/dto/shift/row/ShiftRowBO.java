@@ -1,16 +1,23 @@
 package com.svbd.svbd.dto.shift.row;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import com.svbd.svbd.dto.employee.EmployeeShortBO;
 
 public class ShiftRowBO {
 
     private Long shiftRowId;
     private Long employeeId;
     private String employeeName;
-    private LocalDateTime startShift;
-    private LocalDateTime endShift;
+    private String startShift;
+    private String endShift;
+    private Integer totalWorkTime;
 
+    public ShiftRowBO() {
+    }
+
+    public ShiftRowBO(EmployeeShortBO employeeShortBO) {
+        this.employeeId = employeeShortBO.getId();
+        this.employeeName = employeeShortBO.getName();
+    }
 
     public Long getShiftRowId() {
         return shiftRowId;
@@ -36,19 +43,27 @@ public class ShiftRowBO {
         this.employeeName = employeeName;
     }
 
-    public LocalDateTime getStartShift() {
+    public String getStartShift() {
         return startShift;
     }
 
-    public void setStartShift(LocalDateTime startShift) {
+    public void setStartShift(String startShift) {
         this.startShift = startShift;
     }
 
-    public LocalDateTime getEndShift() {
+    public String getEndShift() {
         return endShift;
     }
 
-    public void setEndShift(LocalDateTime endShift) {
+    public void setEndShift(String endShift) {
         this.endShift = endShift;
+    }
+
+    public Integer getTotalWorkTime() {
+        return totalWorkTime;
+    }
+
+    public void setTotalWorkTime(Integer totalWorkTime) {
+        this.totalWorkTime = totalWorkTime;
     }
 }

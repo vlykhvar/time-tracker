@@ -1,6 +1,5 @@
-package com.svbd.svbd.dao.salary;
+package com.svbd.svbd.repository.salary;
 
-import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.entity.Salary;
 import com.svbd.svbd.settings.HibernateModule;
 import org.hibernate.HibernateException;
@@ -8,7 +7,7 @@ import org.hibernate.HibernateException;
 import java.util.Collection;
 import java.util.List;
 
-public class SalaryDaoImpl {
+public class SalaryRepository {
 
     public Long createSalary(Salary salary) throws HibernateException {
         Long id;
