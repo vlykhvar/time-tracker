@@ -1,10 +1,9 @@
-package com.svbd.svbd.dao.shift;
+package com.svbd.svbd.repository.shift;
 
 import com.svbd.svbd.entity.ShiftRow;
 import com.svbd.svbd.settings.HibernateModule;
 import org.hibernate.HibernateException;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 

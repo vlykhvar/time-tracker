@@ -34,7 +34,7 @@ public final class StageUtil {
 
     public static void creatStage(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(StageUtil.class.getResource(MAIN_PAGE.getPagePath()));
-        Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
+        Scene scene = new Scene(fxmlLoader.load(), 1280, 560);
         stage.setTitle("SVBD");
         stage.setScene(scene);
         stage.show();

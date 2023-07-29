@@ -11,16 +11,20 @@ module com.svbd.svbd {
     requires jakarta.persistence;
     requires jakarta.activation;
     requires java.naming;
+    requires jdk.internal.opt;
 
     opens com.svbd.svbd to javafx.fxml;
     opens com.svbd.svbd.controller to javafx.fxml;
     opens com.svbd.svbd.entity to org.hibernate.orm.core, javafx.base;
     opens com.svbd.svbd.dto.employee to javafx.base;
     opens com.svbd.svbd.dto.shift.row to javafx.base;
+    opens com.svbd.svbd.repository.projection to org.hibernate.orm.core;
 
     exports com.svbd.svbd;
     exports com.svbd.svbd.settings;
     exports com.svbd.svbd.controller;
     exports com.svbd.svbd.enums;
+    exports com.svbd.svbd.controller.customfield;
+    exports com.svbd.svbd.repository.projection;
     opens com.svbd.svbd.enums to javafx.fxml;
 }

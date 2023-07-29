@@ -1,4 +1,4 @@
-package com.svbd.svbd.dao.shift;
+package com.svbd.svbd.repository.shift;
 
 import com.svbd.svbd.entity.Shift;
 import com.svbd.svbd.settings.HibernateModule;
@@ -6,18 +6,18 @@ import jakarta.persistence.NoResultException;
 import org.hibernate.HibernateException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
-public class ShiftDao {
+public class ShiftRepository {
 
     public Optional<Shift> getShiftByDate(LocalDate shiftDate) {
         var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createQuery("FROM Shift s WHERE s.shiftDate = :shiftDate");
+        var query = session.createQuery("FROM Shift s JOIN FETCH s.shiftRows sr WHERE s.shiftDate = :shiftDate");
         query.setParameter("shiftDate", shiftDate);
         try {
-           var shift = (Shift) query.getSingleResult();
-           return Optional.of(shift);
+            var shift = (Shift) query.getSingleResult();
+            session.close();
+            return Optional.of(shift);
         } catch (NoResultException e) {
             return Optional.empty();
         }
@@ -43,7 +43,7 @@ public class ShiftDao {
         var session = HibernateModule.getSessionFactory().openSession();
         var transaction = session.beginTransaction();
         try {
-            session.update(shift);
+            session.saveOrUpdate(shift);
             transaction.commit();
             session.close();
         } catch (HibernateException e) {
@@ -57,6 +57,8 @@ public class ShiftDao {
         var session = HibernateModule.getSessionFactory().openSession();
         var query = session.createQuery("SELECT count(*) > 0 FROM Shift s WHERE s.shiftDate = :shiftDate");
         query.setParameter("shiftDate", shiftDate);
-        return (Boolean) query.uniqueResult();
+        var result = (Boolean) query.uniqueResult();
+        session.close();
+        return result;
     }
 }
