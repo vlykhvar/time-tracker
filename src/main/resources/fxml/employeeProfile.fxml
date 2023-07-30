@@ -8,23 +8,27 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 <?import com.svbd.svbd.controller.customfield.NumberField?>
-<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="396.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.EmployeeProfileController">
-   <children>
-      <Label layoutX="283.0" layoutY="30.0" prefHeight="18.0" prefWidth="119.0" text="Профіль працівника" />
-      <TextField fx:id="employeeIdField" alignment="CENTER" disable="true" editable="false" layoutX="17.0" layoutY="13.0" prefHeight="26.0" prefWidth="52.0" visible="false" />
-      <TableView fx:id="salaryTable" layoutX="335.0" layoutY="73.0" prefHeight="214.0" prefWidth="316.0" editable="true">
-         <columns>
-            <TableColumn fx:id="id" prefWidth="75.0" text="ID" visible="false" editable="false"/>
-            <TableColumn fx:id="perHour" prefWidth="112.79998779296875" text="Ставка за годину" editable="true"/>
-            <TableColumn fx:id="startDate" prefWidth="96.800048828125" text="Початок" editable="true"/>
-            <TableColumn fx:id="endDate" prefWidth="104.79998779296875" text="Кінець" editable="true"/>
-         </columns>
-      </TableView>
-      <TextField fx:id="name" layoutX="125.0" layoutY="97.0" />
-      <NumberField fx:id="phoneNumber" layoutX="125.0" layoutY="123.0" prefHeight="26.0" prefWidth="150.0" />
-      <Label layoutX="56.0" layoutY="100.0" prefHeight="18.0" prefWidth="21.0" text="ПІБ" />
-      <Label layoutX="22.0" layoutY="127.0" prefHeight="18.0" prefWidth="94.0" text="Номер Телефону" />
-      <Button fx:id="save" layoutX="276.0" layoutY="330.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="94.0" text="Зберегти"
-      onAction="#saveEmployee"/>
-   </children>
+<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="425" prefWidth="329" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.svbd.svbd.controller.EmployeeProfileController">
+    <children>
+        <TextField fx:id="employeeIdField" alignment="CENTER" disable="true" editable="false"
+                   prefHeight="0.0" prefWidth="0.0" visible="false"/>
+        <TableView fx:id="salaryTable" layoutX="6.0" layoutY="101.0" prefHeight="262.4" prefWidth="317.0"
+                   editable="true">
+            <columns>
+                <TableColumn fx:id="id" prefWidth="75.0" text="ID" visible="false" editable="false"/>
+                <TableColumn fx:id="perHour" prefWidth="112.79998779296875" text="Ставка за годину"/>
+                <TableColumn fx:id="startDate" prefWidth="96.800048828125" text="Початок"/>
+                <TableColumn fx:id="endDate" prefWidth="104.79998779296875" text="Кінець"/>
+            </columns>
+        </TableView>
+        <TextField fx:id="name" layoutX="31" layoutY="21.0" prefHeight="26.4" prefWidth="267.0" alignment="CENTER"/>
+        <NumberField fx:id="phoneNumber" layoutX="29.5" layoutY="69.0" prefHeight="26.4" prefWidth="267.0" alignment="CENTER"/>
+        <Label layoutX="163.0" layoutY="2.0" prefHeight="18.0" prefWidth="23.0" text="ПІБ"/>
+        <Label layoutX="116.0" layoutY="50.0" prefHeight="18.4" prefWidth="94.4" text="Номер Телефону"/>
+        <Button fx:id="save" layoutX="125.0" layoutY="374.0" mnemonicParsing="false" prefHeight="26.4" prefWidth="76.0"
+                text="Зберегти"
+                onAction="#saveEmployee"/>
+    </children>
 </AnchorPane>
