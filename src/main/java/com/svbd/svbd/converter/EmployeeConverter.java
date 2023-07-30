@@ -1,5 +1,6 @@
 package com.svbd.svbd.converter;
 
+import com.svbd.svbd.dto.employee.EmployeeBO;
 import com.svbd.svbd.dto.employee.EmployeeShortBO;
 import com.svbd.svbd.dto.employee.EmployeeWithLastSalaryBO;
 import com.svbd.svbd.entity.Employee;
@@ -8,6 +9,9 @@ import com.svbd.svbd.repository.projection.EmployeeShortProjection;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.svbd.svbd.converter.SalaryConverter.toSalaries;
+import static com.svbd.svbd.converter.SalaryConverter.toSalaryBOs;
 
 public final class EmployeeConverter {
 
@@ -19,7 +23,6 @@ public final class EmployeeConverter {
         employeeWithLastSalary.setId(employee.getEmployeeId());
         employeeWithLastSalary.setName(employee.getName());
         employeeWithLastSalary.setPhoneNumber(employee.getPhoneNumber());
-        employeeWithLastSalary.setPerHour(employee.getSalaries().stream().findFirst().get().getAnHour());
         return employeeWithLastSalary;
     }
 
@@ -40,5 +43,23 @@ public final class EmployeeConverter {
         return projections.stream()
                 .map(EmployeeConverter::toEmployeeShortBO)
                 .collect(Collectors.toSet());
+    }
+
+    public static EmployeeBO toEmployeeBO(Employee employee) {
+        var employeeBO = new EmployeeBO();
+        employeeBO.setId(employee.getEmployeeId());
+        employeeBO.setPhoneNumber(employee.getPhoneNumber());
+        employeeBO.setName(employee.getName());
+        employeeBO.getSalaries().addAll(toSalaryBOs(employee.getSalaries()));
+        return employeeBO;
+    }
+
+    public static Employee toEmployee(EmployeeBO employeeBO) {
+        var employee = new Employee();
+        employee.setEmployeeId(employeeBO.getId());
+        employee.setPhoneNumber(employeeBO.getPhoneNumber());
+        employee.setName(employeeBO.getName());
+        employee.getSalaries().addAll(toSalaries(employeeBO.getSalaries()));
+        return employee;
     }
 }

@@ -4,14 +4,14 @@ import com.svbd.svbd.entity.ShiftRow;
 import com.svbd.svbd.settings.HibernateModule;
 import org.hibernate.HibernateException;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ShiftRowRepository {
 
-
     public void createShiftRows(Collection<ShiftRow> shiftRows) {
-        List<Long> ids;
         var session = HibernateModule.getSessionFactory().openSession();
         var transaction = session.beginTransaction();
         try {
@@ -23,6 +23,15 @@ public class ShiftRowRepository {
             session.close();
             throw new HibernateException(e);
         }
+    }
+
+    public Set<ShiftRow> findAllByShiftDate(LocalDate date) {
+        var session = HibernateModule.getSessionFactory().openSession();
+        var query = session.createQuery("SELECT sr FROM ShiftRow sr LEFT JOIN sr.shift s WHERE s.id = :date", ShiftRow.class);
+        query.setParameter("date", date);
+        var result = query.getResultStream().collect(Collectors.toSet());
+        session.close();
+        return result;
     }
 
     public void removeByIds(Collection<Long> shiftRowIds) {

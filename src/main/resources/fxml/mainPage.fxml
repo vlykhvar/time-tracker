@@ -45,59 +45,78 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import com.svbd.svbd.controller.customfield.NumberField?>
-<VBox prefHeight="591.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.MainPageController">
-  
-  <children>
-    <MenuBar VBox.vgrow="NEVER">
-      <menus>
-        <Menu mnemonicParsing="false" text="Файл">
-          <items>
-            <MenuItem id="menuQuit" fx:id="menuQuit" mnemonicParsing="false" onAction="#exit" text="Вихід" />
-          </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Управління">
-          <items>
-            <MenuItem fx:id="menuEmployee" mnemonicParsing="false" onAction="#showEmployeeScene" text="Працівники" />
-          </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Допомога">
-          <items>
-            <MenuItem fx:id="about" mnemonicParsing="false" onAction="#openDialog" text="About" />
-          </items>
-        </Menu>
-      </menus>
-    </MenuBar>
-    <AnchorPane fx:id="anchorPane" minHeight="-Infinity" prefHeight="522.0" prefWidth="1260.0" VBox.vgrow="ALWAYS">
-         <children>
-            <Button fx:id="saveButton" layoutX="1110.0" layoutY="468.0" mnemonicParsing="false" onAction="#saveShift" prefHeight="26.0" prefWidth="142.0" text="Зберегти" />
-            <DatePicker fx:id="datePicker" layoutX="439.0" layoutY="14.0" AnchorPane.topAnchor="14.0" />
-            <TableView fx:id="shitEmployeeData" editable="true" layoutX="335.0" layoutY="54.0" prefHeight="378.0" prefWidth="918.0">
-              <columns>
-                <TableColumn fx:id="employeeName" prefWidth="184.800048828125" resizable="false" text="Працівник" />
-                <TableColumn fx:id="startEmployeeShift" minWidth="0.0" prefWidth="170.4000244140625" resizable="false" sortable="false" text="Початок" />
-                  <TableColumn fx:id="endEmployeeShift" minWidth="8.0" prefWidth="190.4000244140625" resizable="false" sortable="false" text="Кінець" />
-                  <TableColumn fx:id="totalWorkTime" editable="false" minWidth="8.0" prefWidth="190.4000244140625" resizable="false" sortable="false" text="Робочих годин" />
-                  <TableColumn fx:id="employeeId" editable="false" minWidth="8.0" prefWidth="190.4000244140625" resizable="false" sortable="false" text="employeeId" visible="false" />
-                  <TableColumn fx:id="shiftRowId" editable="false" minWidth="8.0" prefWidth="190.4000244140625" resizable="false" sortable="false" text="shiftRowId" visible="false" />
-              </columns>
-            </TableView>
-            <Label layoutX="335.0" layoutY="17.0" prefHeight="18.0" prefWidth="79.0" text="Дата зміни" AnchorPane.topAnchor="17.0" />
-            <Label layoutX="21.0" layoutY="29.0" prefHeight="18.0" prefWidth="98.0" text="Каса на ранок" />
-            <Label layoutX="20.0" layoutY="56.0" prefHeight="18.0" prefWidth="79.0" text="Каса прокату" />
-            <Label layoutX="20.0" layoutY="82.0" prefHeight="18.0" prefWidth="79.0" text="Каса на вечір" />
-            <Label layoutX="20.0" layoutY="111.0" prefHeight="18.0" prefWidth="98.0" text="Каса ключі ранок" />
-            <Label layoutX="20.0" layoutY="138.0" prefHeight="18.0" prefWidth="79.0" text="Каса ключі " />
-            <Label layoutX="20.0" layoutY="164.0" prefHeight="18.0" prefWidth="120.0" text="Каса ключі вечір" />
-            <NumberField fx:id="cashOnMorning" layoutX="128.0" layoutY="26.0" text="0" />
-            <NumberField fx:id="totalCash" layoutX="128.0" layoutY="53.0" text="0" />
-            <NumberField fx:id="cashOnEvening" layoutX="128.0" layoutY="79.0" text="0" />
-            <NumberField fx:id="cashKeyOnMorning" layoutX="128.0" layoutY="108.0" text="0" />
-            <NumberField fx:id="cashKeyTotal" layoutX="128.0" layoutY="135.0" text="0" />
-            <NumberField fx:id="cashKeyOnEvening" layoutX="128.0" layoutY="161.0" text="0" />
-            <TextArea fx:id="comments" layoutX="21.0" layoutY="305.0" prefHeight="127.0" prefWidth="291.0" promptText="Коментарі до зміни" />
-            <Label layoutX="20.0" layoutY="239.0" prefHeight="18.0" prefWidth="67.0" text="Таксі" />
-            <NumberField fx:id="taxi" layoutX="128.0" layoutY="235.0" text="0" />
-         </children>
-    </AnchorPane>
-  </children>
+<VBox prefHeight="480.0" prefWidth="858.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.svbd.svbd.controller.MainPageController">
+
+    <children>
+        <MenuBar VBox.vgrow="NEVER">
+            <menus>
+                <Menu mnemonicParsing="false" text="Файл">
+                    <items>
+                        <MenuItem id="menuQuit" fx:id="menuQuit" mnemonicParsing="false" onAction="#exit" text="Вихід"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Управління">
+                    <items>
+                        <MenuItem fx:id="menuEmployee" mnemonicParsing="false" onAction="#showEmployeeScene"
+                                  text="Працівники"/>
+                        <MenuItem fx:id="menuManagement" mnemonicParsing="false" onAction="#showReportScene"
+                                  text="Звіти"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Допомога">
+                    <items>
+                        <MenuItem fx:id="about" mnemonicParsing="false" onAction="#openDialog" text="About"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <AnchorPane fx:id="anchorPane" minHeight="-Infinity" prefHeight="500.0" prefWidth="1280.0" VBox.vgrow="ALWAYS">
+            <children>
+                <TableView fx:id="shitEmployeeData" editable="true" layoutX="335.0" layoutY="54.0" prefHeight="378.4"
+                           prefWidth="487">
+                    <columns>
+                        <TableColumn fx:id="employeeName" prefWidth="200" resizable="false"
+                                     text="Працівник"/>
+                        <TableColumn fx:id="startEmployeeShift" minWidth="0.0" prefWidth="95"
+                                     resizable="false" sortable="false" text="Початок"/>
+                        <TableColumn fx:id="endEmployeeShift" minWidth="8.0" prefWidth="95"
+                                     resizable="false" sortable="false" text="Кінець"/>
+                        <TableColumn fx:id="totalWorkTime" minWidth="8.0" prefWidth="95"
+                                     resizable="false" sortable="false" text="Робочих годин"/>
+                        <TableColumn fx:id="employeeId" editable="false" minWidth="8.0" prefWidth="190.4000244140625"
+                                     resizable="false" sortable="false" text="employeeId" visible="false"/>
+                        <TableColumn fx:id="shiftRowId" editable="false" minWidth="8.0" prefWidth="190.4000244140625"
+                                     resizable="false" sortable="false" text="shiftRowId" visible="false"/>
+                    </columns>
+                </TableView>
+                <Label layoutX="335.0" layoutY="17.0" prefHeight="18.0" prefWidth="61.0" text="Дата зміни"
+                       AnchorPane.topAnchor="17.0"/>
+                <Label layoutX="21.0" layoutY="29.0" prefHeight="18.0" prefWidth="98.0" text="Каса на ранок"/>
+                <Label layoutX="20.0" layoutY="56.0" prefHeight="18.0" prefWidth="79.0" text="Каса прокату"/>
+                <Label layoutX="20.0" layoutY="82.0" prefHeight="18.0" prefWidth="79.0" text="Каса на вечір"/>
+                <Label layoutX="20.0" layoutY="111.0" prefHeight="18.0" prefWidth="98.0" text="Каса ключі ранок"/>
+                <Label layoutX="20.0" layoutY="138.0" prefHeight="18.0" prefWidth="79.0" text="Каса ключі "/>
+                <Label layoutX="20.0" layoutY="164.0" prefHeight="18.0" prefWidth="120.0" text="Каса ключі вечір"/>
+                <Label layoutX="610.0" layoutY="17.0" prefHeight="18.4" prefWidth="79.2" text="Бонус години:"/>
+                <Label layoutX="20.0" layoutY="239.0" prefHeight="18.0" prefWidth="67.0" text="Таксі"/>
+                <NumberField fx:id="cashOnMorning" layoutX="128.0" layoutY="26.0" text="0"/>
+                <NumberField fx:id="totalCash" layoutX="128.0" layoutY="53.0" text="0"/>
+                <NumberField fx:id="cashOnEvening" layoutX="128.0" layoutY="79.0" text="0"/>
+                <NumberField fx:id="cashKeyOnMorning" layoutX="128.0" layoutY="108.0" text="0"/>
+                <NumberField fx:id="cashKeyTotal" layoutX="128.0" layoutY="135.0" text="0"/>
+                <NumberField fx:id="cashKeyOnEvening" layoutX="128.0" layoutY="161.0" text="0"/>
+                <NumberField fx:id="taxi" layoutX="128.0" layoutY="235.0" text="0"/>
+                <NumberField fx:id="bonusTime" layoutX="700.0" layoutY="17.0" text="0" prefHeight="26.4"
+                             prefWidth="67.2" AnchorPane.topAnchor="13.0"/>
+                <Button fx:id="printOut" layoutX="601.0" layoutY="440.0" mnemonicParsing="false" onAction="#printOut"
+                        prefHeight="26.0" prefWidth="79.2" text="Друкувати"/>
+                <Button fx:id="saveButton" layoutX="726.0" layoutY="440.0" mnemonicParsing="false"
+                        onAction="#saveShift" prefHeight="26.0" prefWidth="79.2" text="Зберегти"/>
+                <TextArea fx:id="comments" layoutX="21.0" layoutY="305.0" prefHeight="127.0F" prefWidth="291.0"
+                          promptText="Коментарі до зміни"/>
+                <DatePicker fx:id="datePicker" layoutX="397.0" layoutY="13.0" AnchorPane.topAnchor="13.0"/>
+            </children>
+        </AnchorPane>
+    </children>
 </VBox>

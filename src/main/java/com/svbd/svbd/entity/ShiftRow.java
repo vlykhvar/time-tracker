@@ -32,6 +32,8 @@ public class ShiftRow {
     @Column(name = "end_shift")
     private LocalDateTime endShift;
 
+    @Column(name = "total_time")
+    private Integer totalTime;
 
     public Long getId() {
         return id;
@@ -71,5 +73,13 @@ public class ShiftRow {
 
     public void setEmployee(Employee employee) {
         this.employee = employee;
+    }
+
+    public Integer getTotalTime() {
+        return totalTime;
+    }
+
+    public void setTotalTime(Integer totalTime) {
+        this.totalTime = totalTime;
     }
 }

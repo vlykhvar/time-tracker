@@ -9,17 +9,16 @@
 <?import com.svbd.svbd.controller.customfield.NumberField?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="553.0" prefWidth="858.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.EmployeeTableController">
    <children>
-      <TableView fx:id="emploeeTable" layoutX="50.0" layoutY="14.0" prefHeight="472.0" prefWidth="574.0" AnchorPane.bottomAnchor="67.0" AnchorPane.rightAnchor="27.0" AnchorPane.topAnchor="14.0">
+      <TableView fx:id="employeeTable" layoutX="50.0" layoutY="14.0" prefHeight="472.0" prefWidth="450.0" AnchorPane.rightAnchor="27.0" >
         <columns>
-          <TableColumn fx:id="idCollumn" editable="false" prefWidth="75.0" text="ID" visible="false" />
-          <TableColumn fx:id="fullnameCollumn" editable="false" prefWidth="75.0" text="ПІБ" />
+          <TableColumn fx:id="employeeIdColumn" editable="false" prefWidth="75.0" text="ID" visible="false" />
+          <TableColumn fx:id="fullNameColumn" editable="false" prefWidth="75.0" text="ПІБ" />
             <TableColumn fx:id="phoneNumberColumn" editable="false" prefWidth="124.79998779296875" text="Номер телефону" />
             <TableColumn fx:id="perHourColumn" editable="false" prefWidth="124.79998779296875" text="ЗП за годину" />
-            <TableColumn id="action" fx:id="action" editable="false" prefWidth="124.79998779296875" text="Редагувати" />
             <TableColumn id="remove" fx:id="remove" editable="false" prefWidth="124.79998779296875" text="Видалити" />
         </columns>
       </TableView>
-      <Button id="newEmploeeButton" fx:id="buttonId" layoutX="47.0" layoutY="325.0" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="180.0" text=" Додати" AnchorPane.bottomAnchor="202.0" AnchorPane.leftAnchor="47.0" AnchorPane.topAnchor="325.0" />
+      <Button id="newEmploeeButton" fx:id="buttonId" layoutX="47.0" layoutY="325.0" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="180.0" text=" Додати" AnchorPane.leftAnchor="47.0" AnchorPane.topAnchor="325.0" />
       <TextField fx:id="fullName" alignment="CENTER" layoutX="62.0" layoutY="203.0" promptText="ФИО" />
       <NumberField fx:id="phoneNumber" alignment="CENTER" layoutX="62.0" layoutY="239.0" promptText="телефон" />
       <NumberField fx:id="perHour" alignment="CENTER" layoutX="62.0" layoutY="277.0" promptText="зп за годину" />

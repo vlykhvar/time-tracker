@@ -5,6 +5,8 @@ import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.entity.Salary;
 import com.svbd.svbd.dto.employee.EmployeeWithLastSalaryBO;
 import com.svbd.svbd.service.EmployeeManagementService;
+import com.svbd.svbd.util.DataHolder;
+import com.svbd.svbd.util.StageUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -13,9 +15,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.io.IOException;
@@ -24,6 +28,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+import static com.svbd.svbd.enums.Pages.EMPLOYEE_PROFILE;
 import static jdk.internal.joptsimple.internal.Strings.EMPTY;
 
 public class EmployeeTableController implements Initializable {
@@ -34,13 +39,13 @@ public class EmployeeTableController implements Initializable {
     private Button buttonId;
 
     @FXML
-    private TableView<EmployeeWithLastSalaryBO> emploeeTable;
+    private TableView<EmployeeWithLastSalaryBO> employeeTable;
 
     @FXML
-    private TableColumn<EmployeeWithLastSalaryBO, String> fullnameCollumn;
+    private TableColumn<EmployeeWithLastSalaryBO, String> fullNameColumn;
 
     @FXML
-    private TableColumn<EmployeeWithLastSalaryBO, Long> idCollumn;
+    private TableColumn<EmployeeWithLastSalaryBO, Long> employeeIdColumn;
 
     @FXML
     private TableColumn<EmployeeWithLastSalaryBO, BigDecimal> perHourColumn;
@@ -50,9 +55,6 @@ public class EmployeeTableController implements Initializable {
 
     @FXML
     private TableColumn<EmployeeWithLastSalaryBO, String> remove;
-
-    @FXML
-    private TableColumn<EmployeeWithLastSalaryBO, String> action;
 
     @FXML
     private NumberField perHour;
@@ -67,6 +69,7 @@ public class EmployeeTableController implements Initializable {
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
         prepareColumn();
+        columnListener();
     }
 
 
@@ -77,7 +80,7 @@ public class EmployeeTableController implements Initializable {
         employee.setPhoneNumber(phoneNumber.getText());
         var salary = new Salary();
         try {
-            salary.setAnHour(new BigDecimal(perHour.getText()));
+            salary.setAnHour(Long.valueOf(perHour.getText()));
         } catch (NumberFormatException e) {
             throw new NumberFormatException();
         }
@@ -96,40 +99,15 @@ public class EmployeeTableController implements Initializable {
     }
 
     private void prepareColumn() {
-        fullnameCollumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        idCollumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        employeeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         perHourColumn.setCellValueFactory(new PropertyValueFactory<>("perHour"));
         phoneNumberColumn.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
-
-        Callback<TableColumn<EmployeeWithLastSalaryBO, String>, TableCell<EmployeeWithLastSalaryBO, String>> cellFactory
-                = new Callback<>() {
-            @Override
-            public TableCell call(final TableColumn<EmployeeWithLastSalaryBO, String> param) {
-                return new TableCell<EmployeeWithLastSalaryBO, String>() {
-                    final Button btn = new Button("Змінити");
-                    @Override
-                    public void updateItem(String item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                            setText(null);
-                        } else {
-                            btn.setOnAction(event -> {
-                                EmployeeWithLastSalaryBO employee = getTableView().getItems().get(getIndex());
-                                System.out.println(employee.getId()
-                                        + "   " + employee.getPhoneNumber()); //TODO adjust editing employee
-                            });
-                            setGraphic(btn);
-                            setText(null);
-                        }
-                    }
-                };
-            }
-        };
 
         var removeFactory
                 = new Callback<TableColumn<EmployeeWithLastSalaryBO, String>, TableCell<EmployeeWithLastSalaryBO, String>>() {
             @Override
+            @SuppressWarnings("all")
             public TableCell call(final TableColumn<EmployeeWithLastSalaryBO, String> param) {
                 return new TableCell<EmployeeWithLastSalaryBO, String>() {
                     final Button btn = new Button("Видалити");
@@ -153,8 +131,25 @@ public class EmployeeTableController implements Initializable {
                 };
             }
         };
-        action.setCellFactory(cellFactory);
         remove.setCellFactory(removeFactory);
-        emploeeTable.setItems(getEmployees());
+        employeeTable.setItems(getEmployees());
+    }
+
+    private void columnListener() {
+        employeeTable.setOnMouseClicked(click -> {
+            if (click.getClickCount() == 2) {
+                @SuppressWarnings("rawtypes")
+                TablePosition pos = employeeTable.getSelectionModel().getSelectedCells().get(0);
+                int row = pos.getRow();
+                var employee = employeeTable.getItems().get(row);
+                try {
+                    DataHolder.getInstance().setData(employee.getId());
+                    StageUtil.changeStage((Stage) buttonId.getScene().getWindow(),EMPLOYEE_PROFILE);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        });
     }
 }

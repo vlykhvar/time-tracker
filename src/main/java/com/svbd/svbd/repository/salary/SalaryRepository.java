@@ -1,9 +1,11 @@
 package com.svbd.svbd.repository.salary;
 
 import com.svbd.svbd.entity.Salary;
+import com.svbd.svbd.repository.projection.SalaryEmployeeProjection;
 import com.svbd.svbd.settings.HibernateModule;
 import org.hibernate.HibernateException;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -25,8 +27,18 @@ public class SalaryRepository {
         }
     }
 
-    public List<Salary> findAllByEmployeeIdsAndEndDateIsNull(Collection<Long> employeeIds) {
+    public List<SalaryEmployeeProjection> findAllByEmployeeIdsAndStartDateEndDateBetweenDate(Collection<Long> employeeIds,
+                                                                           LocalDate date) {
         var session = HibernateModule.getSessionFactory().openSession();
-        return session.createQuery("SELECT s FROM Salary s JOIN FETCH s.employee WHERE s.removedAt IS NULL", Salary.class).getResultList();
+        var query = session.createQuery(
+                "SELECT new com.svbd.svbd.repository.projection.SalaryEmployeeProjection(e.id, s.anHour) " +
+                        "FROM Salary s JOIN s.employee e WHERE e.id IN :employeeIds " +
+                        "AND (:date >= s.createAt AND (s.removedAt IS NULL OR :date <= s.removedAt))",
+                SalaryEmployeeProjection.class);
+        query.setParameter("date", date);
+        query.setParameterList("employeeIds", employeeIds);
+        var result = query.getResultList();
+        session.close();
+        return result;
     }
 }

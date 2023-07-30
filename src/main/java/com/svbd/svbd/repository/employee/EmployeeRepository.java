@@ -3,12 +3,12 @@ package com.svbd.svbd.repository.employee;
 import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.repository.projection.EmployeeShortProjection;
 import com.svbd.svbd.settings.HibernateModule;
-import jakarta.persistence.TypedQuery;
 import org.hibernate.HibernateException;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,6 +31,20 @@ public class EmployeeRepository {
         return id;
     }
 
+    public void updateEmployee(Employee employee) {
+        var session = HibernateModule.getSessionFactory().openSession();
+        var transaction = session.beginTransaction();
+        try {
+            session.update(employee);
+            transaction.commit();
+            session.close();
+        } catch (HibernateException e) {
+            transaction.rollback();
+            session.close();
+            throw new HibernateException(e);
+        }
+    }
+
     public void removeById(Long employeeId) throws HibernateException {
         var session = HibernateModule.getSessionFactory().openSession();
         var transaction = session.beginTransaction();
@@ -38,7 +52,7 @@ public class EmployeeRepository {
             var query = session.createQuery("FROM Employee a WHERE a.id = :employeeId");
             query.setParameter("employeeId", employeeId);
             var employee = (Employee) query.uniqueResult();
-            employee.setRemovedAt(LocalDateTime.now());
+            employee.setRemovedAt(LocalDate.now());
             session.save(employee);
             transaction.commit();
             session.close();
@@ -54,12 +68,14 @@ public class EmployeeRepository {
         return session.createQuery("SELECT a FROM Employee a", Employee.class).getResultList();
     }
 
-    public List<Employee> findAllWithLastSalary() {
+    public List<Employee> findAllRemovedAtIsNull() {
         var session = HibernateModule.getSessionFactory().openSession();
-        return session.createQuery(
-                "SELECT e FROM Employee e JOIN e.salaries s WHERE s.removedAt IS NULL AND e.removedAt IS NULL",
-                        Employee.class)
-                .getResultList();
+        var query = session.createQuery(
+                        "SELECT e FROM Employee e WHERE e.removedAt IS NULL",
+                        Employee.class);
+        var result = query.getResultList();
+        session.close();
+        return result;
     }
 
     public List<EmployeeShortProjection> findAllEmployeeIdAndName() {
@@ -83,5 +99,15 @@ public class EmployeeRepository {
         var result = employeeTypedQuery.getResultStream().collect(Collectors.toSet());
         session.close();
         return result;
+    }
+
+    public Optional<Employee> findById(Long employeeId) {
+        var session = HibernateModule.getSessionFactory().openSession();
+        var query = session.createQuery(
+                "SELECT e FROM Employee e JOIN FETCH e.salaries WHERE e.id = :employeeId", Employee.class);
+        query.setParameter("employeeId", employeeId);
+        var result = query.getSingleResultOrNull();
+        session.close();
+        return Optional.of(result);
     }
 }
