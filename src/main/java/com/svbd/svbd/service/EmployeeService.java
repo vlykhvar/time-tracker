@@ -21,7 +21,7 @@ public class EmployeeService {
         return repository.findAll();
     }
 
-    public List<Employee> findAllWithLastSalary() {
-        return repository.findAllWithLastSalary();
+    public List<Employee> findAllActiveEmployee() {
+        return repository.findAllRemovedAtIsNull();
     }
 }

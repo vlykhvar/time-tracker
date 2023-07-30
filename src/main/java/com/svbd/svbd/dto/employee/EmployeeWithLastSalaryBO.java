@@ -1,12 +1,9 @@
 package com.svbd.svbd.dto.employee;
 
-import java.math.BigDecimal;
-import java.util.Objects;
-
 public class EmployeeWithLastSalaryBO extends EmployeeShortBO {
 
     private String phoneNumber;
-    private BigDecimal perHour;
+    private Long perHour;
 
     public String getPhoneNumber() {
         return phoneNumber;
@@ -16,11 +13,11 @@ public class EmployeeWithLastSalaryBO extends EmployeeShortBO {
         this.phoneNumber = phoneNumber;
     }
 
-    public BigDecimal getPerHour() {
+    public Long getPerHour() {
         return perHour;
     }
 
-    public void setPerHour(BigDecimal perHour) {
+    public void setPerHour(Long perHour) {
         this.perHour = perHour;
     }
 

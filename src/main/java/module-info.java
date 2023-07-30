@@ -19,6 +19,7 @@ module com.svbd.svbd {
     opens com.svbd.svbd.dto.employee to javafx.base;
     opens com.svbd.svbd.dto.shift.row to javafx.base;
     opens com.svbd.svbd.repository.projection to org.hibernate.orm.core;
+    opens com.svbd.svbd.dto.salary to javafx.base;
 
     exports com.svbd.svbd;
     exports com.svbd.svbd.settings;

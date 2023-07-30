@@ -1,5 +1,6 @@
 package com.svbd.svbd.service;
 
+import com.svbd.svbd.exception.ShiftNotFoundException;
 import com.svbd.svbd.repository.shift.ShiftRepository;
 import com.svbd.svbd.entity.Shift;
 
@@ -9,20 +10,12 @@ public class ShiftService {
 
     private ShiftRepository repository = new ShiftRepository();
 
-    public Shift getShiftByDate(LocalDate date) {
-        Shift shift;
-        var optionalShift = repository.getShiftByDate(date);
-        if (optionalShift.isPresent()) {
-            shift = optionalShift.get();
-        } else {
-            shift = new Shift();
-            repository.getShiftByDate(date.minusDays(1))
-                    .ifPresent(yesterdayShift -> {
-                        shift.setCashOnMorning(yesterdayShift.getCashOnEvening());
-                        shift.setCashKeyOnMorning(yesterdayShift.getCashKeyOnEvening());
-                    });
-        }
-        return shift;
+    public Shift getShiftByDate(LocalDate date) throws ShiftNotFoundException {
+        return repository.getShiftByDate(date).orElseThrow(ShiftNotFoundException::new);
+    }
+
+    public Shift getShiftByDateWithRows(LocalDate date) {
+        return repository.findShiftByDateJoinShiftRows(date).orElse(new Shift());
     }
 
     public LocalDate createShift(Shift shift) {

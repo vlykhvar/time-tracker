@@ -1,17 +1,15 @@
 package com.svbd.svbd.dto.shift;
 
 import com.svbd.svbd.dto.shift.row.ShiftRowBO;
-import jakarta.persistence.Column;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ShiftBO {
 
-    private Long shiftId;
     private LocalDate date;
+    private Long bonusTime;
     private Long totalCash;
     private Long cashOnEvening;
     private Long cashOnMorning;
@@ -97,5 +95,13 @@ public class ShiftBO {
 
     public List<ShiftRowBO> getRows() {
         return rows;
+    }
+
+    public Long getBonusTime() {
+        return bonusTime;
+    }
+
+    public void setBonusTime(Long bonusTime) {
+        this.bonusTime = bonusTime;
     }
 }

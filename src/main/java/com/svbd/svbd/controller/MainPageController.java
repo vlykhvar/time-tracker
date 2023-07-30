@@ -3,7 +3,6 @@ package com.svbd.svbd.controller;
 import com.svbd.svbd.controller.customfield.NumberField;
 import com.svbd.svbd.dto.shift.ShiftBO;
 import com.svbd.svbd.dto.shift.row.ShiftRowBO;
-import com.svbd.svbd.entity.Shift;
 import com.svbd.svbd.service.EmployeeManagementService;
 import com.svbd.svbd.service.ShiftManagementService;
 import javafx.application.Platform;
@@ -13,24 +12,26 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.converter.IntegerStringConverter;
-
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.*;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static com.svbd.svbd.enums.Pages.TABLE_EMPLOYEE;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
+import static com.svbd.svbd.util.ConstantUtil.TIME_REGEX;
+import static com.svbd.svbd.util.DateTimeUtil.prepareWorkTotalTime;
 import static com.svbd.svbd.util.StageUtil.showStage;
-import static java.time.LocalTime.now;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -99,9 +100,14 @@ public class MainPageController implements Initializable {
     @FXML
     private TextArea comments;
 
-
     @FXML
     private Button saveButton;
+
+    @FXML
+    private Button printOut;
+
+    @FXML
+    private TextField bonusTime;
 
     @FXML
     void exit(ActionEvent event) {
@@ -131,16 +137,32 @@ public class MainPageController implements Initializable {
         shift.setCashOnEvening(checkAndChangeStringToLong(cashOnEvening));
         shift.setCashOnMorning(checkAndChangeStringToLong(cashOnMorning));
         shift.setTotalCash(checkAndChangeStringToLong(totalCash));
+        shift.setBonusTime(checkAndChangeStringToLong(bonusTime));
         var rows = shitEmployeeData.getItems().stream()
-                .filter(row -> nonNull(row.getStartShift()) || !row.getStartShift().isEmpty())
+                .filter(row -> nonNull(row.getStartShift()) && !row.getStartShift().isEmpty() || nonNull(row.getShiftRowId()))
                 .collect(Collectors.toSet());
         isCorrectTime(rows);
-        shiftManagementService.creatOrUpdate(shift, rows);
+            shiftManagementService.creatOrUpdate(shift, rows);
         prepareData();
+    }
+
+    @FXML
+    void printOut(){
+    }
+
+    @FXML
+    void showReportScene() {
+
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        Platform.runLater(() -> {
+            saveButton.getScene().getAccelerators().put(
+                    new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN), () -> {
+                saveButton.fire();
+            });
+        });
         initDateOnFirstOpen();
         prepareData();
         datePicker.setOnAction((event) -> {
@@ -156,7 +178,6 @@ public class MainPageController implements Initializable {
                             event.getTablePosition().getRow());
                     shift.setStartShift(checkIfValueIsTime(event.getOldValue(), event.getNewValue()));
                     shift.setTotalWorkTime(prepareTotalTime(shift.getStartShift(), shift.getEndShift()));
-                    totalWorkTime.setCellValueFactory(new PropertyValueFactory<>("totalWorkTime"));
                 }
         );
         endEmployeeShift.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -165,10 +186,8 @@ public class MainPageController implements Initializable {
                             event.getTablePosition().getRow());
                     shift.setEndShift(checkIfValueIsTime(event.getOldValue(), event.getNewValue()));
                     shift.setTotalWorkTime(prepareTotalTime(shift.getStartShift(), shift.getEndShift()));
-                    totalWorkTime.setCellValueFactory(new PropertyValueFactory<>("totalWorkTime"));
                 }
         );
-        totalWorkTime.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
     }
 
     private void prepareData() {
@@ -186,6 +205,7 @@ public class MainPageController implements Initializable {
         shiftRowId.setCellValueFactory(new PropertyValueFactory<>("shiftRowId"));
         totalWorkTime.setCellValueFactory(new PropertyValueFactory<>("totalWorkTime"));
         shiftRowId.setCellValueFactory(new PropertyValueFactory<>("shiftRowId"));
+        bonusTime.setText(String.valueOf(shift.getBonusTime()));
     }
 
     private void prepareShiftDataToScene(ShiftBO shiftBO) {;
@@ -247,7 +267,7 @@ public class MainPageController implements Initializable {
     }
 
     private String checkIfValueIsTime(String oldValue, String newValue) {
-        if (newValue.isEmpty() || newValue.matches("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")) {
+        if (newValue.isEmpty() || newValue.matches(TIME_REGEX)) {
             return newValue;
         } else {
             showAlert(Alert.AlertType.ERROR, "Hе корректний формат", "Формат має бути у вигляді HH:mm");
@@ -256,19 +276,13 @@ public class MainPageController implements Initializable {
     }
 
     private Integer prepareTotalTime(String startShift, String endShift) {
-            if (nonNull(startShift) && !startShift.isEmpty() && nonNull(endShift) && !endShift.isEmpty() && startShift.matches("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")
-            && endShift.matches("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")) {
-                var date = datePicker.getValue();
+            if (nonNull(startShift) && !startShift.isEmpty() && nonNull(endShift) && !endShift.isEmpty() &&
+                    startShift.matches(TIME_REGEX) && endShift.matches(TIME_REGEX)) {
+                var currentDate = datePicker.getValue();
                 var startShiftTime = LocalTime.parse(startShift);
                 var endShiftTime = LocalTime.parse(endShift);
-                var startShiftLocalDateTime = LocalDateTime.of(date, startShiftTime);
-                LocalDateTime endShiftLocalDateTime;
-                if (endShiftTime.getHour() > 0 && endShiftTime.getHour() < 8) {
-                    endShiftLocalDateTime = LocalDateTime.of(date.plusDays(1L), endShiftTime);
-                } else {
-                    endShiftLocalDateTime = LocalDateTime.of(date, endShiftTime);
-                }
-                return (int) ChronoUnit.HOURS.between(startShiftLocalDateTime, endShiftLocalDateTime);
+                return prepareWorkTotalTime(currentDate, startShiftTime, endShiftTime);
+
             }
             return null;
     }

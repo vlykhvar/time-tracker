@@ -1,12 +1,7 @@
 package com.svbd.svbd.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +33,10 @@ public class Shift {
     @Column(name = "cash_key_total")
     private Long cashKeyTotal;
 
+    @Column(name = "bonus_time")
+    private Long bonusTime;
+
+    @Column(name = "comments")
     private String comments;
 
     @OneToMany(mappedBy = "shift", cascade = CascadeType.ALL)
@@ -128,5 +127,13 @@ public class Shift {
 
     public void setCashOnEvening(Long cashOnEvening) {
         this.cashOnEvening = cashOnEvening;
+    }
+
+    public Long getBonusTime() {
+        return bonusTime;
+    }
+
+    public void setBonusTime(Long bonusTime) {
+        this.bonusTime = bonusTime;
     }
 }

@@ -16,9 +16,9 @@ public class Salary extends CreatedAtRemovedAt {
     private Long salaryId;
 
     @Column(name = "AN_HOUR")
-    private BigDecimal anHour;
+    private Long anHour;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EMPLOYEE_ID", referencedColumnName = "EMPLOYEE_ID")
     private Employee employee;
 
@@ -30,11 +30,11 @@ public class Salary extends CreatedAtRemovedAt {
         this.salaryId = salaryId;
     }
 
-    public BigDecimal getAnHour() {
+    public Long getAnHour() {
         return anHour;
     }
 
-    public void setAnHour(BigDecimal anHour) {
+    public void setAnHour(Long anHour) {
         this.anHour = anHour;
     }
 

@@ -3,31 +3,31 @@ package com.svbd.svbd.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @MappedSuperclass
 public abstract class CreatedAtRemovedAt {
 
     @Column(name = "CREATE_AT")
-    private LocalDateTime createAt;
+    private LocalDate createAt;
 
     @Column(name = "REMOVED_AT")
-    private LocalDateTime removedAt;
+    private LocalDate removedAt;
 
 
-    public LocalDateTime getCreateAt() {
+    public LocalDate getCreateAt() {
         return createAt;
     }
 
-    public void setCreateAt(LocalDateTime createAt) {
+    public void setCreateAt(LocalDate createAt) {
         this.createAt = createAt;
     }
 
-    public LocalDateTime getRemovedAt() {
+    public LocalDate getRemovedAt() {
         return removedAt;
     }
 
-    public void setRemovedAt(LocalDateTime removedAt) {
+    public void setRemovedAt(LocalDate removedAt) {
         this.removedAt = removedAt;
     }
 }
