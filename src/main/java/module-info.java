@@ -15,7 +15,7 @@ module com.svbd.svbd {
 
     opens com.svbd.svbd to javafx.fxml;
     opens com.svbd.svbd.controller to javafx.fxml;
-    opens com.svbd.svbd.entity to org.hibernate.orm.core, javafx.base;
+    opens com.svbd.svbd.entity to org.hibernate.orm.core, javafx.base, javafx.fxml;
     opens com.svbd.svbd.dto.employee to javafx.base;
     opens com.svbd.svbd.dto.shift.row to javafx.base;
     opens com.svbd.svbd.repository.projection to org.hibernate.orm.core;

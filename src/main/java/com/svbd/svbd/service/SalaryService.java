@@ -18,6 +18,13 @@ public class SalaryService {
         return repository.createSalary(salary);
     }
 
+    public void removeSalaryById(Collection<Long> salaryIds) {
+        if (salaryIds.isEmpty()) {
+            return;
+        }
+        repository.removeSalariesByIds(salaryIds);
+    }
+
     public List<SalaryEmployeeProjection> getActualSalaryForEmployees(Collection<Long> employeeId) {
         return repository.findAllByEmployeeIdsAndStartDateEndDateBetweenDate(employeeId, LocalDate.now());
     }

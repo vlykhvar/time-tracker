@@ -7,6 +7,7 @@ import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.repository.projection.EmployeeShortProjection;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,10 +27,10 @@ public final class EmployeeConverter {
         return employeeWithLastSalary;
     }
 
-    public static Set<EmployeeWithLastSalaryBO> toEmployeeWithLastSalaryBOs(Collection<Employee> employees) {
+    public static List<EmployeeWithLastSalaryBO> toEmployeeWithLastSalaryBOs(Collection<Employee> employees) {
         return employees.stream()
                 .map(EmployeeConverter::toEmployeeWithLastSalaryBO)
-                .collect(Collectors.toSet());
+                .toList();
     }
 
     public static EmployeeShortBO toEmployeeShortBO(EmployeeShortProjection projection) {

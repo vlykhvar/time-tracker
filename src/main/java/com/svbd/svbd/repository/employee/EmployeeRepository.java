@@ -104,7 +104,7 @@ public class EmployeeRepository {
     public Optional<Employee> findById(Long employeeId) {
         var session = HibernateModule.getSessionFactory().openSession();
         var query = session.createQuery(
-                "SELECT e FROM Employee e JOIN FETCH e.salaries WHERE e.id = :employeeId", Employee.class);
+                "SELECT e FROM Employee e LEFT JOIN FETCH e.salaries WHERE e.id = :employeeId", Employee.class);
         query.setParameter("employeeId", employeeId);
         var result = query.getSingleResultOrNull();
         session.close();

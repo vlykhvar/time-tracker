@@ -22,7 +22,6 @@
       <Button id="newEmploeeButton" fx:id="buttonId" layoutX="51.0" layoutY="214.0" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="105.0" text="Створити" AnchorPane.leftAnchor="51.0" AnchorPane.topAnchor="214.0" />
       <TextField fx:id="fullName" alignment="CENTER" layoutX="14.0" layoutY="102.0" prefHeight="26.0" prefWidth="180.0" promptText="ПІБ" />
       <NumberField fx:id="phoneNumber" alignment="CENTER" layoutX="14.0" layoutY="140.0" prefHeight="26.0" prefWidth="180.0" promptText="Номер телефону" />
-      <NumberField fx:id="perHour" alignment="CENTER" layoutX="14.0" layoutY="176.0" prefHeight="26.0" prefWidth="180.0" promptText="плата за годину" />
       <Text layoutX="22.0" layoutY="89.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Додати нового співробітника" wrappingWidth="164.0" />
    </children>
 </AnchorPane>

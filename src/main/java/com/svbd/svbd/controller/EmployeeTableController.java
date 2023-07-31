@@ -23,7 +23,9 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+import static com.svbd.svbd.enums.Exceptions.NUMBER_VALUE_EXCEPTION;
 import static com.svbd.svbd.enums.Pages.EMPLOYEE_PROFILE;
+import static com.svbd.svbd.util.AlertUtil.showAlert;
 import static com.svbd.svbd.util.AlertUtil.showAlertWithButtonYesAndNo;
 import static jdk.internal.joptsimple.internal.Strings.EMPTY;
 
@@ -78,6 +80,7 @@ public class EmployeeTableController implements Initializable {
         try {
             salary.setAnHour(Long.valueOf(perHour.getText()));
         } catch (NumberFormatException e) {
+            showAlert(NUMBER_VALUE_EXCEPTION);
             throw new NumberFormatException();
         }
         employee.getSalaries().add(salary);

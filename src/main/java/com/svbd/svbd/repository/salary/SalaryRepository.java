@@ -27,8 +27,9 @@ public class SalaryRepository {
         }
     }
 
-    public List<SalaryEmployeeProjection> findAllByEmployeeIdsAndStartDateEndDateBetweenDate(Collection<Long> employeeIds,
-                                                                           LocalDate date) {
+    public List<SalaryEmployeeProjection> findAllByEmployeeIdsAndStartDateEndDateBetweenDate(
+            Collection<Long> employeeIds,
+            LocalDate date) {
         var session = HibernateModule.getSessionFactory().openSession();
         var query = session.createQuery(
                 "SELECT new com.svbd.svbd.repository.projection.SalaryEmployeeProjection(e.id, s.anHour) " +
@@ -40,5 +41,15 @@ public class SalaryRepository {
         var result = query.getResultList();
         session.close();
         return result;
+    }
+
+    public void removeSalariesByIds(Collection<Long> salaryIds) {
+        var session = HibernateModule.getSessionFactory().openSession();
+        var transaction = session.beginTransaction();
+        var query = session.createQuery("DELETE FROM Salary s WHERE s.id IN :salaryIds");
+        query.setParameterList("salaryIds", salaryIds);
+        query.executeUpdate();
+        transaction.commit();
+        session.close();
     }
 }
