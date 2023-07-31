@@ -1,9 +1,9 @@
 package com.svbd.svbd.controller;
 
 import com.svbd.svbd.controller.customfield.NumberField;
+import com.svbd.svbd.dto.employee.EmployeeWithLastSalaryBO;
 import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.entity.Salary;
-import com.svbd.svbd.dto.employee.EmployeeWithLastSalaryBO;
 import com.svbd.svbd.service.EmployeeManagementService;
 import com.svbd.svbd.util.DataHolder;
 import com.svbd.svbd.util.StageUtil;
@@ -12,12 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -28,7 +23,10 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+import static com.svbd.svbd.enums.Exceptions.NUMBER_VALUE_EXCEPTION;
 import static com.svbd.svbd.enums.Pages.EMPLOYEE_PROFILE;
+import static com.svbd.svbd.util.AlertUtil.showAlert;
+import static com.svbd.svbd.util.AlertUtil.showAlertWithButtonYesAndNo;
 import static jdk.internal.joptsimple.internal.Strings.EMPTY;
 
 public class EmployeeTableController implements Initializable {
@@ -82,6 +80,7 @@ public class EmployeeTableController implements Initializable {
         try {
             salary.setAnHour(Long.valueOf(perHour.getText()));
         } catch (NumberFormatException e) {
+            showAlert(NUMBER_VALUE_EXCEPTION);
             throw new NumberFormatException();
         }
         employee.getSalaries().add(salary);
@@ -121,8 +120,13 @@ public class EmployeeTableController implements Initializable {
                         } else {
                             btn.setOnAction(event -> {
                                 var employee = getTableView().getItems().get(getIndex());
-                                employeeManagementService.removeById(employee.getId());
-                                initialize(null, null);
+                                var result = showAlertWithButtonYesAndNo(Alert.AlertType.WARNING,
+                                        "Видалення співробітника",
+                                        String.format("Ви бажаєте видалити співробітника %s?", employee.getName()));
+                                if (result) {
+                                    employeeManagementService.removeById(employee.getId());
+                                    initialize(null, null);
+                                }
                             });
                             setGraphic(btn);
                             setText(null);

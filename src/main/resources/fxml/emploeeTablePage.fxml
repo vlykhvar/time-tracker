@@ -5,22 +5,23 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
 
 <?import com.svbd.svbd.controller.customfield.NumberField?>
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="553.0" prefWidth="858.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.EmployeeTableController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="485.0" prefWidth="839.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.EmployeeTableController">
    <children>
-      <TableView fx:id="employeeTable" layoutX="50.0" layoutY="14.0" prefHeight="472.0" prefWidth="450.0" AnchorPane.rightAnchor="27.0" >
+      <TableView fx:id="employeeTable" layoutX="225.0" layoutY="4.0" prefHeight="472.0" prefWidth="602.0">
         <columns>
           <TableColumn fx:id="employeeIdColumn" editable="false" prefWidth="75.0" text="ID" visible="false" />
-          <TableColumn fx:id="fullNameColumn" editable="false" prefWidth="75.0" text="ПІБ" />
-            <TableColumn fx:id="phoneNumberColumn" editable="false" prefWidth="124.79998779296875" text="Номер телефону" />
-            <TableColumn fx:id="perHourColumn" editable="false" prefWidth="124.79998779296875" text="ЗП за годину" />
-            <TableColumn id="remove" fx:id="remove" editable="false" prefWidth="124.79998779296875" text="Видалити" />
+          <TableColumn fx:id="fullNameColumn" editable="false" prefWidth="191.20001220703125" text="ПІБ" />
+            <TableColumn fx:id="phoneNumberColumn" editable="false" minWidth="3.2000732421875" prefWidth="155.199951171875" text="Номер телефону" />
+            <TableColumn fx:id="perHourColumn" editable="false" prefWidth="113.5999755859375" text="ЗП за годину" />
+            <TableColumn id="remove" fx:id="remove" editable="false" minWidth="0.0" prefWidth="152.800048828125" text="Видалити" />
         </columns>
       </TableView>
-      <Button id="newEmploeeButton" fx:id="buttonId" layoutX="47.0" layoutY="325.0" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="180.0" text=" Додати" AnchorPane.leftAnchor="47.0" AnchorPane.topAnchor="325.0" />
-      <TextField fx:id="fullName" alignment="CENTER" layoutX="62.0" layoutY="203.0" promptText="ФИО" />
-      <NumberField fx:id="phoneNumber" alignment="CENTER" layoutX="62.0" layoutY="239.0" promptText="телефон" />
-      <NumberField fx:id="perHour" alignment="CENTER" layoutX="62.0" layoutY="277.0" promptText="зп за годину" />
+      <Button id="newEmploeeButton" fx:id="buttonId" layoutX="51.0" layoutY="214.0" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="105.0" text="Створити" AnchorPane.leftAnchor="51.0" AnchorPane.topAnchor="214.0" />
+      <TextField fx:id="fullName" alignment="CENTER" layoutX="14.0" layoutY="102.0" prefHeight="26.0" prefWidth="180.0" promptText="ПІБ" />
+      <NumberField fx:id="phoneNumber" alignment="CENTER" layoutX="14.0" layoutY="140.0" prefHeight="26.0" prefWidth="180.0" promptText="Номер телефону" />
+      <Text layoutX="22.0" layoutY="89.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Додати нового співробітника" wrappingWidth="164.0" />
    </children>
 </AnchorPane>

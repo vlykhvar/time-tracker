@@ -144,8 +144,8 @@ public class EmployeeProfileController implements Initializable {
         employeeBO.setPhoneNumber(phoneNumber.getText());
         employeeBO.setName(name.getText());
         var salaries = salaryTable.getItems().stream()
-                .filter(salaryBO -> nonNull(salaryBO.getAnHour()))
-                .filter(salaryBO -> nonNull(salaryBO.getStartDate()))
+                .filter(salaryBO -> (nonNull(salaryBO.getAnHour()) && nonNull(salaryBO.getStartDate()))
+                        || nonNull(salaryBO.getId()))
                 .peek(salaryBO -> salaryBO.setEmployeeId(employeeBO.getId()))
                 .collect(Collectors.toSet());
         validateStartAndEndDate(salaries);
