@@ -22,7 +22,6 @@ import static com.svbd.svbd.converter.EmployeeConverter.toEmployeeWithLastSalary
 public class EmployeeManagementService {
 
     private final EmployeeService employeeService = new EmployeeService();
-
     private final EmployeeRepository repository = new EmployeeRepository();
     private final SalaryService salaryService = new SalaryService();
 

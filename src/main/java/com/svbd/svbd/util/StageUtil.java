@@ -42,7 +42,7 @@ public final class StageUtil {
         FXMLLoader fxmlLoader = new FXMLLoader(StageUtil.class.getResource(MAIN_PAGE.getPagePath()));
         prepareIcon(stage);
         Scene scene = new Scene(fxmlLoader.load());
-        scene.getStylesheets().add(StageUtil.class.getResource("/application.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(StageUtil.class.getResource("/application.css")).toExternalForm());
         stage.setTitle("SVBD");
         stage.setScene(scene);
         stage.show();
