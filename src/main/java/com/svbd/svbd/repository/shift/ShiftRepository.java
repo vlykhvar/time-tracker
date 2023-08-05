@@ -5,6 +5,7 @@ import com.svbd.svbd.settings.HibernateModule;
 import org.hibernate.HibernateException;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public class ShiftRepository {
@@ -62,6 +63,16 @@ public class ShiftRepository {
         var query = session.createQuery("SELECT count(*) > 0 FROM Shift s WHERE s.shiftDate = :shiftDate");
         query.setParameter("shiftDate", shiftDate);
         var result = (Boolean) query.uniqueResult();
+        session.close();
+        return result;
+    }
+
+    public List<Shift> findAllShiftsInPeriod(LocalDate dateFrom, LocalDate dateTo) {
+        var session = HibernateModule.getSessionFactory().openSession();
+        var query = session.createQuery("FROM Shift s WHERE s.shiftDate >= :dateFrom AND s.shiftDate <= :dateTo");
+        query.setParameter("dateFrom", dateFrom);
+        query.setParameter("dateTo", dateTo);
+        var result = (List<Shift>) query.getResultList();
         session.close();
         return result;
     }

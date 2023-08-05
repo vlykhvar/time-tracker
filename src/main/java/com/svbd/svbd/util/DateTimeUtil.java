@@ -6,8 +6,9 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+import static com.svbd.svbd.util.ConstantUtil.EMPTY;
 import static java.util.Objects.isNull;
-import static jdk.internal.joptsimple.internal.Strings.EMPTY;
+import static java.util.Objects.nonNull;
 
 public final class DateTimeUtil {
 
@@ -52,7 +53,9 @@ public final class DateTimeUtil {
 
     public static Integer prepareWorkTotalTime(LocalDateTime startEmployeeShift,
                                                LocalDateTime endEmployeeShift) {
-        return (int) ChronoUnit.HOURS.between(startEmployeeShift, endEmployeeShift);
+        return nonNull(startEmployeeShift) && nonNull (endEmployeeShift) ?
+                (int) ChronoUnit.HOURS.between(startEmployeeShift, endEmployeeShift) :
+                0;
     }
 
     public static LocalDateTime prepareNightShiftEndDate(LocalDate shiftDate, String endTime) {

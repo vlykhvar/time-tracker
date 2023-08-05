@@ -14,11 +14,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
@@ -27,7 +25,7 @@ import static com.svbd.svbd.enums.Exceptions.NUMBER_VALUE_EXCEPTION;
 import static com.svbd.svbd.enums.Pages.EMPLOYEE_PROFILE;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
 import static com.svbd.svbd.util.AlertUtil.showAlertWithButtonYesAndNo;
-import static jdk.internal.joptsimple.internal.Strings.EMPTY;
+import static com.svbd.svbd.util.ConstantUtil.EMPTY;
 
 public class EmployeeTableController implements Initializable {
 
@@ -44,9 +42,6 @@ public class EmployeeTableController implements Initializable {
 
     @FXML
     private TableColumn<EmployeeWithLastSalaryBO, Long> employeeIdColumn;
-
-    @FXML
-    private TableColumn<EmployeeWithLastSalaryBO, BigDecimal> perHourColumn;
 
     @FXML
     private TableColumn<EmployeeWithLastSalaryBO, String> phoneNumberColumn;
@@ -69,7 +64,6 @@ public class EmployeeTableController implements Initializable {
         prepareColumn();
         columnListener();
     }
-
 
     @FXML
     void createEmployee(ActionEvent event) throws SQLException, IOException {
@@ -100,7 +94,6 @@ public class EmployeeTableController implements Initializable {
     private void prepareColumn() {
         fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         employeeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        perHourColumn.setCellValueFactory(new PropertyValueFactory<>("perHour"));
         phoneNumberColumn.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
 
         var removeFactory
@@ -148,7 +141,7 @@ public class EmployeeTableController implements Initializable {
                 var employee = employeeTable.getItems().get(row);
                 try {
                     DataHolder.getInstance().setData(employee.getId());
-                    StageUtil.changeStage((Stage) buttonId.getScene().getWindow(),EMPLOYEE_PROFILE);
+                    StageUtil.showStage(EMPLOYEE_PROFILE);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

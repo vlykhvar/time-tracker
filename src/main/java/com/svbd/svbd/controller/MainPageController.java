@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -16,6 +17,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 
 import java.io.IOException;
 import java.net.URL;
@@ -24,9 +28,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import static com.svbd.svbd.enums.Pages.REPORTS_PAGE;
 import static com.svbd.svbd.enums.Pages.TABLE_EMPLOYEE;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
 import static com.svbd.svbd.util.ConstantUtil.TIME_REGEX;
@@ -39,6 +45,7 @@ public class MainPageController implements Initializable {
 
     private final ShiftManagementService shiftManagementService = new ShiftManagementService();
     private final EmployeeManagementService employeeManagementService = new EmployeeManagementService();
+    public Menu mangement;
 
     @FXML
     private MenuItem about;
@@ -151,8 +158,37 @@ public class MainPageController implements Initializable {
     }
 
     @FXML
-    void showReportScene() {
+    void showReportScene() throws IOException {
+        showStage(REPORTS_PAGE);
+    }
 
+    @FXML
+    void validateUser() throws IOException {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Необхідна автентифікація");
+        dialog.setHeaderText("Для входу в розділ управління необхідно введення пароля.");
+        dialog.setGraphic(new Circle(15, Color.RED)); // Custom graphic
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        PasswordField pwd = new PasswordField();
+        HBox content = new HBox();
+        content.setAlignment(Pos.CENTER_LEFT);
+        content.setSpacing(10);
+        content.getChildren().addAll(new Label("Введіть пароль для входу:"), pwd);
+        dialog.getDialogPane().setContent(content);
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                return pwd.getText();
+            }
+            return null;
+        });
+
+        Optional<String> result = dialog.showAndWait();
+        var password = result.orElseThrow(IOException::new);
+        if ("1234".equals(password)) {
+            return;
+        }
+        throw new IOException();
     }
 
     @Override
@@ -224,7 +260,7 @@ public class MainPageController implements Initializable {
                 .map(ShiftRowBO::new)
                 .collect(Collectors.toSet());
         shitEmployeeData.getItems().clear();
-        shitEmployeeData.getItems().addAll(shifts);
+        shitEmployeeData.getItems().addAll(shifts.stream().sorted(Comparator.comparing(ShiftRowBO::getEmployeeName)).toList());
 
     }
 
@@ -240,7 +276,7 @@ public class MainPageController implements Initializable {
 
     private void initDateOnFirstOpen() {
         LocalDate initDate;
-        if (LocalDateTime.now().getHour() < 8) {
+        if (LocalDateTime.now().getHour() < 7) {
             initDate = LocalDate.now().minusDays(1);
         } else {
             initDate = LocalDate.now();
@@ -282,15 +318,13 @@ public class MainPageController implements Initializable {
                 var startShiftTime = LocalTime.parse(startShift);
                 var endShiftTime = LocalTime.parse(endShift);
                 return prepareWorkTotalTime(currentDate, startShiftTime, endShiftTime);
-
             }
-            return null;
+            return 0;
     }
 
     private void isCorrectTime(Collection<ShiftRowBO> rowBOs) throws Exception {
         for (var row : rowBOs) {
-            var total = prepareTotalTime(row.getStartShift(), row.getEndShift());
-            if (isNull(total) || total > 0) {
+            if (prepareTotalTime(row.getStartShift(), row.getEndShift()) >= 0) {
                 continue;
             }
             showAlert(Alert.AlertType.ERROR, "Невірвно вказаний час",

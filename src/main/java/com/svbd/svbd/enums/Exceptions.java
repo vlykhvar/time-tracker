@@ -9,7 +9,7 @@ public enum Exceptions {
     DATE_OVERLAPPING_EXCEPTION(ERROR, "Перекриття дат",
             "Дати заробітньої плати перекриваются"),
     START_DATE_AFTER_EXCEPTION(ERROR, "Не вірний проміжок часу",
-            "Дата початку дії заробітної плати пілся кінця періоду"),
+            "Дата початку періода мусить бути пілся кінця періоду"),
     NUMBER_VALUE_EXCEPTION(ERROR, "Не корректне число", "Не корректне число");
 
     private final AlertType alertType;
