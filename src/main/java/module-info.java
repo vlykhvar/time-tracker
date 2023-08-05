@@ -12,6 +12,8 @@ module com.svbd.svbd {
     requires jakarta.activation;
     requires java.naming;
     requires jdk.internal.opt;
+    requires org.apache.poi.poi;
+    requires org.apache.poi.ooxml;
 
     opens com.svbd.svbd to javafx.fxml;
     opens com.svbd.svbd.controller to javafx.fxml;
@@ -20,6 +22,8 @@ module com.svbd.svbd {
     opens com.svbd.svbd.dto.shift.row to javafx.base;
     opens com.svbd.svbd.repository.projection to org.hibernate.orm.core;
     opens com.svbd.svbd.dto.salary to javafx.base;
+    opens com.svbd.svbd.service to javafx.base, javafx.fxml;
+    opens com.svbd.svbd.dto.report to javafx.base, javafx.fxml;
 
     exports com.svbd.svbd;
     exports com.svbd.svbd.settings;
@@ -27,5 +31,8 @@ module com.svbd.svbd {
     exports com.svbd.svbd.enums;
     exports com.svbd.svbd.controller.customfield;
     exports com.svbd.svbd.repository.projection;
+    exports com.svbd.svbd.dto.report;
+    exports com.svbd.svbd.service;
+
     opens com.svbd.svbd.enums to javafx.fxml;
 }

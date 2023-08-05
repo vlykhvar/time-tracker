@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Text?>
+<?import com.svbd.svbd.controller.customfield.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<?import com.svbd.svbd.controller.customfield.NumberField?>
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="485.0" prefWidth="839.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.EmployeeTableController">
-   <children>
-      <TableView fx:id="employeeTable" layoutX="225.0" layoutY="4.0" prefHeight="472.0" prefWidth="602.0">
-        <columns>
-          <TableColumn fx:id="employeeIdColumn" editable="false" prefWidth="75.0" text="ID" visible="false" />
-          <TableColumn fx:id="fullNameColumn" editable="false" prefWidth="191.20001220703125" text="ПІБ" />
-            <TableColumn fx:id="phoneNumberColumn" editable="false" minWidth="3.2000732421875" prefWidth="155.199951171875" text="Номер телефону" />
-            <TableColumn fx:id="perHourColumn" editable="false" prefWidth="113.5999755859375" text="ЗП за годину" />
-            <TableColumn id="remove" fx:id="remove" editable="false" minWidth="0.0" prefWidth="152.800048828125" text="Видалити" />
-        </columns>
-      </TableView>
-      <Button id="newEmploeeButton" fx:id="buttonId" layoutX="51.0" layoutY="214.0" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="105.0" text="Створити" AnchorPane.leftAnchor="51.0" AnchorPane.topAnchor="214.0" />
-      <TextField fx:id="fullName" alignment="CENTER" layoutX="14.0" layoutY="102.0" prefHeight="26.0" prefWidth="180.0" promptText="ПІБ" />
-      <NumberField fx:id="phoneNumber" alignment="CENTER" layoutX="14.0" layoutY="140.0" prefHeight="26.0" prefWidth="180.0" promptText="Номер телефону" />
-      <Text layoutX="22.0" layoutY="89.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Додати нового співробітника" wrappingWidth="164.0" />
-   </children>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="485.0" prefWidth="740.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.EmployeeTableController">
+    <children>
+        <TableView fx:id="employeeTable" layoutX="225.0" layoutY="4.0" prefHeight="472.0" prefWidth="503.0">
+            <columns>
+                <TableColumn fx:id="employeeIdColumn" editable="false" prefWidth="75.0" text="ID" visible="false" />
+                <TableColumn fx:id="fullNameColumn" editable="false" prefWidth="191.20001220703125" text="ПІБ" />
+                <TableColumn fx:id="phoneNumberColumn" editable="false" minWidth="3.2000732421875" prefWidth="155.199951171875" text="Номер телефону" />
+                <TableColumn id="remove" fx:id="remove" editable="false" minWidth="0.0" prefWidth="152.800048828125" text="Видалити" />
+            </columns>
+        </TableView>
+        <Button id="newEmploeeButton" fx:id="buttonId" layoutX="51.0" layoutY="214.0" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="105.0" text="Створити" AnchorPane.leftAnchor="51.0" AnchorPane.topAnchor="214.0" />
+        <TextField fx:id="fullName" alignment="CENTER" layoutX="14.0" layoutY="102.0" prefHeight="26.0" prefWidth="180.0" promptText="ПІБ" />
+        <NumberField fx:id="phoneNumber" alignment="CENTER" layoutX="14.0" layoutY="140.0" prefHeight="26.0" prefWidth="180.0" promptText="Номер телефону" />
+        <NumberField fx:id="perHour" alignment="CENTER" layoutX="14.0" layoutY="178.0" prefHeight="26.0" prefWidth="180.0" promptText="зп за годину" />
+        <Text layoutX="22.0" layoutY="89.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Додати нового співробітника" wrappingWidth="164.0" />
+    </children>
 </AnchorPane>

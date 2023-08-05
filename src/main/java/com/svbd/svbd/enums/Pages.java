@@ -4,7 +4,8 @@ public enum  Pages {
 
     MAIN_PAGE("/fxml/mainPage.fxml"),
     EMPLOYEE_PROFILE("/fxml/employeeProfile.fxml"),
-    TABLE_EMPLOYEE("/fxml/emploeeTablePage.fxml");
+    TABLE_EMPLOYEE("/fxml/emploeeTablePage.fxml"),
+    REPORTS_PAGE("/fxml/reportsPage.fxml");
 
     private final String pagePath;
 

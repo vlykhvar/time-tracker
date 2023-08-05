@@ -27,6 +27,10 @@ public final class StageUtil {
         currentStage.close();
     }
 
+    public static void closeCurrentStage(Stage currentStage) {
+        currentStage.close();
+    }
+
     public static void showStage(Pages nextPage) throws IOException {
         var fxmlLoader = new FXMLLoader(StageUtil.class.getResource(nextPage.getPagePath()));
         var scene = new Scene(fxmlLoader.load());
