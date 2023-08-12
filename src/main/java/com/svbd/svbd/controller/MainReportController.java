@@ -22,7 +22,7 @@ import static com.svbd.svbd.util.AlertUtil.showAlert;
 
 public class MainReportController extends Application implements Initializable {
 
-    private ReportsService reportsService = new ReportsService();
+    private final ReportsService reportsService = new ReportsService();
 
     @FXML
     private DatePicker dateFrom;
@@ -42,7 +42,6 @@ public class MainReportController extends Application implements Initializable {
         var request = new MainReport(dateFrom.getValue(), dateTo.getValue());
         var patch = reportsService.generateMainRepost(request);
         File excelFile = new File(patch);
-        makeReport.getScene().getFocusOwner();
         getHostServices().showDocument(excelFile.toURI().toURL().toExternalForm());
         var s = (Stage) makeReport.getScene().getWindow();
         s.close();
