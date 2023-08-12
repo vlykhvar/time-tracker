@@ -25,6 +25,9 @@ import java.util.stream.Collectors;
 
 import static com.svbd.svbd.enums.ColorRgb.*;
 import static com.svbd.svbd.util.ConstantUtil.EMPTY;
+import static com.svbd.svbd.util.DateTimeUtil.formatDateForShowing;
+import static com.svbd.svbd.util.DateTimeUtil.getStringHourAndMinuteFromLocalDateTime;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.poi.ss.usermodel.BorderStyle.*;
 import static org.apache.poi.xssf.usermodel.XSSFFont.DEFAULT_FONT_NAME;
@@ -32,22 +35,27 @@ import static org.apache.poi.xssf.usermodel.XSSFFont.DEFAULT_FONT_NAME;
 public class ReportsService {
 
     private static final String MAIN_REPORT_HEADER = "Звіт з %s по %s";
+    private static final String CASH_ON_MORNING_FIELD = "Каса на ранок";
+    private static final String CASH_FIELD = "Каса прокату";
+    private static final String CASH_ON_EVENING_FIELD = "Каса на вечір";
+    private static final String CASH_KEY_ON_MORNING_FIELD = "Каса ключі на ранок";
+    private static final String CASH_KEY_FIELD = "Каса ключі";
+    private static final String CASH_KEY_ON_EVENING_FIELD = "Каса ключі на вечір";
+    private static final String TAXI = "Таксі";
 
     private ShiftRepository shiftRepository = new ShiftRepository();
     private ShiftRowRepository shiftRowRepository = new ShiftRowRepository();
 
     public String generateMainRepost(MainReport request) throws IOException {
-        XSSFWorkbook workbook = new XSSFWorkbook();
+        var workbook = new XSSFWorkbook();
         var sheet = prepareHeader(workbook, request.dateFrom(), request.dateTo());
 
         prepareSecondRow(workbook, sheet, request.dateFrom(), request.dateTo());
         prepareEmployeeSalaryRows(workbook, sheet, request.dateFrom(), request.dateTo());
         prepareShiftRows(workbook, sheet, request.dateFrom(), request.dateTo());
+
         int noOfColumns = sheet.getRow(1).getPhysicalNumberOfCells();
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, noOfColumns - 1));
-        File currDir = new File(".");
-        String path = currDir.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + "temsp.xls";
         var a = sheet.getRow(1);
         a.getPhysicalNumberOfCells();
         int b = 0;
@@ -56,11 +64,137 @@ public class ReportsService {
             b++;
         }
         sheet.createFreezePane(1, 0, 1, 0);
-        FileOutputStream outputStream = new FileOutputStream(fileLocation);
+
+        var currDir = new File(".");
+        var path = currDir.getAbsolutePath();
+        var fileLocation = path.substring(0, path.length() - 1) + "temsp.xls";
+        var outputStream = new FileOutputStream(fileLocation);
         workbook.write(outputStream);
         workbook.close();
         return fileLocation;
     }
+
+    public String generateDailyReport(LocalDate date) throws IOException {
+        var shift = shiftRepository.getShiftByDate(date).get();
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.createSheet(formatDateForShowing(shift.getShiftDate()));
+        var row = sheet.createRow(0);
+        var cell = row.createCell(0);
+        cell.setCellValue("Дата зміни " + formatDateForShowing(shift.getShiftDate()));
+        row = sheet.createRow(1);
+        cell = row.createCell(2);
+        cell.setCellValue("ПІБ");
+        cell = row.createCell(4);
+        cell.setCellValue("Бонус години");
+        cell = row.createCell(6);
+        cell.setCellValue(shift.getBonusTime());
+        row = sheet.createRow(2);
+        cell = row.createCell(3);
+        cell.setCellValue("Розпочав");
+        cell = row.createCell(4);
+        cell.setCellValue("Закінчив");
+        cell = row.createCell(5);
+        cell.setCellValue("Робочих годин");
+        cell = row.createCell(6);
+        cell.setCellValue("Робочих годин");
+        row = sheet.createRow(3);
+        cell = row.createCell(0);
+        cell.setCellValue(CASH_ON_MORNING_FIELD);
+        cell = row.createCell(1);
+        cell.setCellValue(shift.getCashOnMorning());
+        row = sheet.createRow(4);
+        cell = row.createCell(0);
+        cell.setCellValue(CASH_FIELD);
+        cell = row.createCell(1);
+        cell.setCellValue(shift.getTotalCash());
+        row = sheet.createRow(5);
+        cell = row.createCell(0);
+        cell.setCellValue(CASH_ON_EVENING_FIELD);
+        cell = row.createCell(1);
+        cell.setCellValue(shift.getCashOnEvening());
+        row = sheet.createRow(6);
+        cell = row.createCell(0);
+        cell.setCellValue(CASH_KEY_ON_MORNING_FIELD);
+        cell = row.createCell(1);
+        cell.setCellValue(shift.getCashKeyOnMorning());
+        row = sheet.createRow(7);
+        cell = row.createCell(0);
+        cell.setCellValue(CASH_KEY_FIELD);
+        cell = row.createCell(1);
+        cell.setCellValue(shift.getCashKeyTotal());
+        row = sheet.createRow(8);
+        cell = row.createCell(0);
+        cell.setCellValue(CASH_KEY_ON_EVENING_FIELD);
+        cell = row.createCell(1);
+        cell.setCellValue(shift.getCashKeyOnEvening());
+        row = sheet.createRow(10);
+        cell = row.createCell(0);
+        cell.setCellValue(TAXI);
+        cell = row.createCell(1);
+        cell.setCellValue(shift.getTaxi());
+
+        var startRow = 3;
+
+        for (var shiftRow : shift.getShiftRows()) {
+            var startCell = 2;
+            row = sheet.getRow(startRow);
+            cell = row.createCell(startCell);
+            cell.setCellValue(shiftRow.getEmployee().getName());
+            cell = row.createCell(++startCell);
+            cell.setCellValue(getStringHourAndMinuteFromLocalDateTime(shiftRow.getStartShift()));
+            cell = row.createCell(++startCell);
+            cell.setCellValue(getStringHourAndMinuteFromLocalDateTime(shiftRow.getEndShift()));
+            cell = row.createCell(++startCell);
+            cell.setCellValue(shiftRow.getTotalTime());
+            cell = row.createCell(++startCell);
+            cell.setCellValue(shiftRow.getTotalTime() + shift.getBonusTime());
+            startRow++;
+        }
+
+        row = sheet.createRow(sheet.getLastRowNum() + 1);
+        cell = row.createCell(0);
+        cell.setCellValue("Комметарі до змінни");
+        sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, 6));
+        row = sheet.createRow(sheet.getLastRowNum() + 1);
+        cell = row.createCell(0);
+        cell.setCellValue(shift.getComments());
+        sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum() + 3, 0, 6));
+
+
+        for (int i = 0; i <= sheet.getLastRowNum(); i++) {
+            row = sheet.getRow(i);
+            if (isNull(row)) {
+                continue;
+            }
+            for (int b = 0; b <= row.getPhysicalNumberOfCells(); b++) {
+                cell = row.getCell(b);
+                if (nonNull(cell)) {
+                    cell.setCellStyle(prepareCellStyle(workbook, WHITE, 11, false, THIN));
+                }
+            }
+        }
+
+
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 6));
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 4, 5));
+        sheet.addMergedRegion(new CellRangeAddress(1, 2, 0, 1));
+        sheet.addMergedRegion(new CellRangeAddress(1, 2, 2, 2));
+
+        int b = 0;
+        while (b < sheet.getRow(0).getPhysicalNumberOfCells()) {
+            sheet.autoSizeColumn(b);
+            b++;
+        }
+        var currDir = new File(".");
+        var path = currDir.getAbsolutePath();
+        var fileLocation = path.substring(0, path.length() - 1) + "daily.xls";
+        var outputStream = new FileOutputStream(fileLocation);
+        workbook.write(outputStream);
+        workbook.close();
+        return fileLocation;
+    }
+
+    /* Private Methods */
 
     private Sheet prepareHeader(XSSFWorkbook workbook, LocalDate from, LocalDate to) {
         Sheet sheet = workbook.createSheet("report");
@@ -92,7 +226,7 @@ public class ReportsService {
                 i++;
                 continue;
             } else if (currentDateForRow.getDayOfMonth() == 15) {
-                rowCell.setCellValue(currentDateForRow.toString());
+                rowCell.setCellValue(formatDateForShowing(currentDateForRow));
                 i++;
                 rowCell = header.createCell(i);
                 rowCell.setCellStyle(prepareCellStyle(workbook, LIGHT_GRAYISH_BLUE, 11, true, MEDIUM));
@@ -100,7 +234,7 @@ public class ReportsService {
             } else if (currentDateForRow.isEqual(
                     currentDateForRow.withDayOfMonth(
                             currentDateForRow.getMonth().length(currentDateForRow.isLeapYear())))) {
-                rowCell.setCellValue(currentDateForRow.toString());
+                rowCell.setCellValue(formatDateForShowing(currentDateForRow));
                 i++;
                 rowCell = header.createCell(i);
                 rowCell.setCellValue("Зарлата за вторую половину месяца");
@@ -110,7 +244,7 @@ public class ReportsService {
                 rowCell.setCellValue("Всего за месяц");
                 rowCell.setCellStyle(prepareCellStyle(workbook, LIGHT_GRAYISH_BLUE, 11, true, MEDIUM));
             } else {
-                rowCell.setCellValue(currentDateForRow.toString());
+                rowCell.setCellValue(formatDateForShowing(currentDateForRow));
             }
             currentDateForRow = currentDateForRow.plusDays(1);
             i++;
@@ -131,8 +265,8 @@ public class ReportsService {
             }
         });
         var employeeNameById = new HashMap<Long, String>();
-        siftRows.forEach(employShiftSalaryProjection -> employeeNameById.put(employShiftSalaryProjection.getEmployeeId(),
-                employShiftSalaryProjection.getName()));
+        siftRows.forEach(employShiftSalaryProjection -> employeeNameById.put(
+                        employShiftSalaryProjection.getEmployeeId(), employShiftSalaryProjection.getName()));
 
         int rowCount = 2;
         int cellCount = 0;
@@ -204,8 +338,10 @@ public class ReportsService {
                 rowCell = row.createCell(cellCount);
                 LocalDate finalCurrentDate = currentDate;
                 var halfMountTotal = employeeShifts.stream()
-                        .filter(employeeShift -> employeeShift.getShiftDate().isAfter(from) || employeeShift.getShiftDate().isEqual(from))
-                        .filter(employeeShift -> employeeShift.getShiftDate().getMonth().equals(finalCurrentDate.getMonth()))
+                        .filter(employeeShift -> employeeShift.getShiftDate().isAfter(from) ||
+                                employeeShift.getShiftDate().isEqual(from))
+                        .filter(employeeShift ->
+                                employeeShift.getShiftDate().getMonth().equals(finalCurrentDate.getMonth()))
                         .filter(employeeShift -> employeeShift.getShiftDate().isBefore(finalCurrentDate) ||
                                 employeeShift.getShiftDate().isEqual(finalCurrentDate))
                         .map(EmployShiftSalaryProjection::getSalary)
@@ -216,12 +352,13 @@ public class ReportsService {
                     currentDate.getMonth().length(currentDate.isLeapYear())))) {
                 cellCount++;
                 rowCell = row.createCell(cellCount);
-                LocalDate finalCurrentDate1 = currentDate;
+                LocalDate finalCurrentDate = currentDate;
                 var halfMountTotal = employeeShifts.stream()
                         .filter(employeeShift -> employeeShift.getShiftDate().getDayOfMonth() > 15)
-                        .filter(employeeShift -> employeeShift.getShiftDate().getMonth().equals(finalCurrentDate1.getMonth()))
-                        .filter(employeeShift -> employeeShift.getShiftDate().isBefore(finalCurrentDate1) ||
-                                employeeShift.getShiftDate().isEqual(finalCurrentDate1))
+                        .filter(employeeShift ->
+                                employeeShift.getShiftDate().getMonth().equals(finalCurrentDate.getMonth()))
+                        .filter(employeeShift -> employeeShift.getShiftDate().isBefore(finalCurrentDate) ||
+                                employeeShift.getShiftDate().isEqual(finalCurrentDate))
                         .map(EmployShiftSalaryProjection::getSalary)
                         .reduce(0L, Long::sum);
                 rowCell.setCellValue(halfMountTotal);
@@ -229,7 +366,8 @@ public class ReportsService {
                 cellCount++;
                 rowCell = row.createCell(cellCount);
                 var mountTotal = employeeShifts.stream()
-                        .filter(employeeShift -> employeeShift.getShiftDate().getMonth().equals(finalCurrentDate1.getMonth()))
+                        .filter(employeeShift ->
+                                employeeShift.getShiftDate().getMonth().equals(finalCurrentDate.getMonth()))
                         .map(EmployShiftSalaryProjection::getSalary)
                         .reduce(0L, Long::sum);
                 rowCell.setCellValue(mountTotal);
@@ -292,33 +430,97 @@ public class ReportsService {
             if (currentDateForRow.getDayOfMonth() == 15) {
                 LocalDate finalCurrentDateForRow = currentDateForRow;
                 var shiftInCurrentPeriods = shifts.stream()
-                        .filter(employeeShift -> employeeShift.getShiftDate().isAfter(from) || employeeShift.getShiftDate().isEqual(from))
-                        .filter(employeeShift -> employeeShift.getShiftDate().getMonth().equals(finalCurrentDateForRow.getMonth()))
+                        .filter(employeeShift -> employeeShift.getShiftDate().isAfter(from) ||
+                                employeeShift.getShiftDate().isEqual(from))
+                        .filter(employeeShift ->
+                                employeeShift.getShiftDate().getMonth().equals(finalCurrentDateForRow.getMonth()))
                         .filter(employeeShift -> employeeShift.getShiftDate().isBefore(finalCurrentDateForRow) ||
                                 employeeShift.getShiftDate().isEqual(finalCurrentDateForRow))
                         .collect(Collectors.toSet());
                 cellPosition++;
                 cells.clear();
                 cell = rowTaxi.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream().map(Shift::getTaxi).reduce(0L, Long::sum));
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getTaxi)
+                        .reduce(0L, Long::sum));
                 cells.add(cell);
                 cell = shiftCash.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream().map(Shift::getTotalCash).reduce(0L, Long::sum));
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getTotalCash)
+                        .reduce(0L, Long::sum));
                 cells.add(cell);
                 cell = keyCash.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream().map(Shift::getCashKeyTotal).reduce(0L, Long::sum));
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getCashKeyTotal)
+                        .reduce(0L, Long::sum));
                 cells.add(cell);
                 cell = totalCash.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream().map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
                         .reduce(0L, Long::sum));
                 cells.add(cell);
                 cells.forEach(cellForStyles -> cellForStyles.setCellStyle(
                         prepareCellStyle(workbook, VERY_SOFT_MAGENTA, 11, true, MEDIUM)));
             } else if (currentDateForRow.isEqual(currentDateForRow.withDayOfMonth(
                     currentDateForRow.getMonth().length(currentDateForRow.isLeapYear())))) {
-
+                LocalDate finalCurrentDateForRow = currentDateForRow;
+                var shiftInCurrentPeriods = shifts.stream()
+                        .filter(employeeShift -> employeeShift.getShiftDate().getDayOfMonth() > 15)
+                        .filter(employeeShift ->
+                                employeeShift.getShiftDate().getMonth().equals(finalCurrentDateForRow.getMonth()))
+                        .filter(employeeShift -> employeeShift.getShiftDate().isBefore(finalCurrentDateForRow) ||
+                                employeeShift.getShiftDate().isEqual(finalCurrentDateForRow))
+                        .collect(Collectors.toSet());
+                cellPosition++;
+                cells.clear();
+                cell = rowTaxi.createCell(cellPosition);
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getTaxi)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                cell = shiftCash.createCell(cellPosition);
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getTotalCash)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                cell = keyCash.createCell(cellPosition);
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getCashKeyTotal)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                cell = totalCash.createCell(cellPosition);
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                var shiftsInCurrentMonth = shifts.stream()
+                        .filter(employeeShift ->
+                                employeeShift.getShiftDate().getMonth().equals(finalCurrentDateForRow.getMonth()))
+                        .collect(Collectors.toSet());
+                cellPosition++;
+                cell = rowTaxi.createCell(cellPosition);
+                cell.setCellValue(shiftsInCurrentMonth.stream()
+                        .map(Shift::getTaxi)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                cell = shiftCash.createCell(cellPosition);
+                cell.setCellValue(shiftsInCurrentMonth.stream()
+                        .map(Shift::getTotalCash)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                cell = keyCash.createCell(cellPosition);
+                cell.setCellValue(shiftsInCurrentMonth.stream()
+                        .map(Shift::getCashKeyTotal)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                cell = totalCash.createCell(cellPosition);
+                cell.setCellValue(shiftsInCurrentMonth.stream()
+                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                cells.forEach(cellForStyles -> cellForStyles.setCellStyle(
+                        prepareCellStyle(workbook, VERY_SOFT_MAGENTA, 11, true, MEDIUM)));
             }
-
 
             cellPosition++;
             currentDateForRow = currentDateForRow.plusDays(1);
@@ -330,7 +532,8 @@ public class ReportsService {
         return employeeShiftByDate.containsKey(date) ? employeeShiftByDate.get(date).getSalary() : 0;
     }
 
-    private CellStyle prepareCellStyle(Workbook workbook, ColorRgb colorRgb, int fontHeight, Boolean bold, BorderStyle borderStyle) {
+    private CellStyle prepareCellStyle(Workbook workbook, ColorRgb colorRgb,
+                                       int fontHeight, Boolean bold, BorderStyle borderStyle) {
         var cellStyle = workbook.createCellStyle();
         if (nonNull(colorRgb)) {
             cellStyle.setFillForegroundColor(new XSSFColor(colorRgb.getRgbColor(), new DefaultIndexedColorMap()));

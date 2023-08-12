@@ -36,7 +36,7 @@ public class Shift {
     @Column(name = "bonus_time")
     private Long bonusTime;
 
-    @Column(name = "comments")
+    @Column(name = "comments", length = 10000)
     private String comments;
 
     @OneToMany(mappedBy = "shift", cascade = CascadeType.ALL)

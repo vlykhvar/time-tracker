@@ -1,8 +1,8 @@
 package com.svbd.svbd.settings;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -25,8 +25,8 @@ public class DatabaseModule {
     }
 
     private void createTables(Connection connection) throws URISyntaxException {
-        URL res = getClass().getClassLoader().getResource("sql");
-        File file = Paths.get(res.toURI()).toFile();
+        var res = getClass().getClassLoader().getResource("sql");
+        var file = Paths.get(res.toURI()).toFile();
         String absolutePath = file.getAbsolutePath();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(absolutePath))) {

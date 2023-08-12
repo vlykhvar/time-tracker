@@ -84,10 +84,10 @@
                 <Label layoutX="20.0" layoutY="164.0" prefHeight="18.0" prefWidth="120.0" text="Каса ключі вечір" />
                 <Label layoutX="610.0" layoutY="17.0" prefHeight="18.4" prefWidth="79.2" text="Бонус години:" />
                 <Label layoutX="20.0" layoutY="239.0" prefHeight="18.0" prefWidth="67.0" text="Таксі" />
-                <NumberField fx:id="cashOnMorning" layoutX="128.0" layoutY="26.0" text="0" />
+                <NumberField fx:id="cashOnMorning" layoutX="128.0" layoutY="26.0" text="0" editable="false"/>
                 <NumberField fx:id="totalCash" layoutX="128.0" layoutY="53.0" text="0" />
                 <NumberField fx:id="cashOnEvening" layoutX="128.0" layoutY="79.0" text="0" />
-                <NumberField fx:id="cashKeyOnMorning" layoutX="128.0" layoutY="108.0" text="0" />
+                <NumberField fx:id="cashKeyOnMorning" layoutX="128.0" layoutY="108.0" text="0" editable="false"/>
                 <NumberField fx:id="cashKeyTotal" layoutX="128.0" layoutY="135.0" text="0" />
                 <NumberField fx:id="cashKeyOnEvening" layoutX="128.0" layoutY="161.0" text="0" />
                 <NumberField fx:id="taxi" layoutX="128.0" layoutY="235.0" text="0" />

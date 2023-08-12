@@ -4,7 +4,9 @@ import com.svbd.svbd.controller.customfield.NumberField;
 import com.svbd.svbd.dto.shift.ShiftBO;
 import com.svbd.svbd.dto.shift.row.ShiftRowBO;
 import com.svbd.svbd.service.EmployeeManagementService;
+import com.svbd.svbd.service.ReportsService;
 import com.svbd.svbd.service.ShiftManagementService;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,19 +15,20 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
@@ -41,10 +44,12 @@ import static com.svbd.svbd.util.StageUtil.showStage;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-public class MainPageController implements Initializable {
+public class MainPageController extends Application implements Initializable {
 
     private final ShiftManagementService shiftManagementService = new ShiftManagementService();
     private final EmployeeManagementService employeeManagementService = new EmployeeManagementService();
+    private final ReportsService reportsService = new ReportsService();
+
     public Menu mangement;
 
     @FXML
@@ -114,7 +119,7 @@ public class MainPageController implements Initializable {
     private Button printOut;
 
     @FXML
-    private TextField bonusTime;
+    private NumberField bonusTime;
 
     @FXML
     void exit(ActionEvent event) {
@@ -154,7 +159,11 @@ public class MainPageController implements Initializable {
     }
 
     @FXML
-    void printOut(){
+    void printOut() throws Exception {
+        saveShift();
+        var patch = reportsService.generateDailyReport(datePicker.getValue());
+        File excelFile = new File(patch);
+        getHostServices().showDocument(excelFile.toURI().toURL().toExternalForm());
     }
 
     @FXML
@@ -193,17 +202,33 @@ public class MainPageController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Platform.runLater(() -> {
-            saveButton.getScene().getAccelerators().put(
-                    new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN), () -> {
-                saveButton.fire();
-            });
+        datePicker.setConverter(new StringConverter<LocalDate>()
+        {
+            private DateTimeFormatter dateTimeFormatter= DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            @Override
+            public String toString(LocalDate localDate)
+            {
+                if(localDate==null)
+                    return "";
+                return dateTimeFormatter.format(localDate);
+            }
+
+            @Override
+            public LocalDate fromString(String dateString)
+            {
+                if(dateString==null || dateString.trim().isEmpty())
+                {
+                    return null;
+                }
+                return LocalDate.parse(dateString,dateTimeFormatter);
+            }
         });
         initDateOnFirstOpen();
-        prepareData();
         datePicker.setOnAction((event) -> {
             prepareData();
         });
+        prepareData();
         editTable();
     }
 
@@ -228,6 +253,7 @@ public class MainPageController implements Initializable {
 
     private void prepareData() {
         var shift = shiftManagementService.getShiftByDate(datePicker.getValue());
+
         prepareShiftDataToScene(shift);
         if (shift.getRows().isEmpty()) {
             prepareShitRowTableWithoutData();
@@ -245,14 +271,15 @@ public class MainPageController implements Initializable {
     }
 
     private void prepareShiftDataToScene(ShiftBO shiftBO) {;
-        taxi.setText(adjustBigDecimal(shiftBO.getTaxi()));
-        totalCash.setText(adjustBigDecimal(shiftBO.getTotalCash()));
-        cashOnMorning.setText(adjustBigDecimal(shiftBO.getCashOnMorning()));
-        cashOnEvening.setText(adjustBigDecimal(shiftBO.getCashOnEvening()));
-        cashKeyOnEvening.setText(adjustBigDecimal(shiftBO.getCashKeyOnEvening()));
-        cashKeyTotal.setText(adjustBigDecimal(shiftBO.getCashKeyTotal()));
-        cashKeyOnMorning.setText(adjustBigDecimal(shiftBO.getCashKeyOnMorning()));
+        taxi.setText(adjustLong(shiftBO.getTaxi()));
+        totalCash.setText(adjustLong(shiftBO.getTotalCash()));
+        cashOnMorning.setText(adjustLong(shiftBO.getCashOnMorning()));
+        cashOnEvening.setText(adjustLong(shiftBO.getCashOnEvening()));
+        cashKeyOnEvening.setText(adjustLong(shiftBO.getCashKeyOnEvening()));
+        cashKeyTotal.setText(adjustLong(shiftBO.getCashKeyTotal()));
+        cashKeyOnMorning.setText(adjustLong(shiftBO.getCashKeyOnMorning()));
         comments.setText(shiftBO.getComments());
+        bonusTime.setText(adjustLong(shiftBO.getBonusTime()));
     }
 
     private void prepareShitRowTableWithoutData() {
@@ -298,8 +325,8 @@ public class MainPageController implements Initializable {
         }
     }
 
-    private String adjustBigDecimal(Long decimal) {
-        return isNull(decimal) ? Long.valueOf(0).toString() : decimal.toString();
+    private String adjustLong(Long number) {
+        return isNull(number) ? Long.valueOf(0).toString() : number.toString();
     }
 
     private String checkIfValueIsTime(String oldValue, String newValue) {
@@ -331,5 +358,10 @@ public class MainPageController implements Initializable {
                     String.format("Співробітник %s має не вірний час зміни", row.getEmployeeName()));
             throw new Exception();
         }
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+
     }
 }

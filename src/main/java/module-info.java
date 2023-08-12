@@ -15,11 +15,11 @@ module com.svbd.svbd {
     requires org.apache.poi.poi;
     requires org.apache.poi.ooxml;
 
-    opens com.svbd.svbd to javafx.fxml;
-    opens com.svbd.svbd.controller to javafx.fxml;
+    opens com.svbd.svbd to javafx.fxml, javafx.base;
+    opens com.svbd.svbd.controller to javafx.fxml, javafx.base;
     opens com.svbd.svbd.entity to org.hibernate.orm.core, javafx.base, javafx.fxml;
-    opens com.svbd.svbd.dto.employee to javafx.base;
-    opens com.svbd.svbd.dto.shift.row to javafx.base;
+    opens com.svbd.svbd.dto.employee to javafx.base, javafx.fxml;
+    opens com.svbd.svbd.dto.shift.row to javafx.base, javafx.fxml;
     opens com.svbd.svbd.repository.projection to org.hibernate.orm.core;
     opens com.svbd.svbd.dto.salary to javafx.base;
     opens com.svbd.svbd.service to javafx.base, javafx.fxml;
@@ -33,6 +33,8 @@ module com.svbd.svbd {
     exports com.svbd.svbd.repository.projection;
     exports com.svbd.svbd.dto.report;
     exports com.svbd.svbd.service;
+    exports com.svbd.svbd.dto.shift.row;
+    exports com.svbd.svbd.dto.employee;
 
     opens com.svbd.svbd.enums to javafx.fxml;
 }

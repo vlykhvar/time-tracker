@@ -4,16 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.svbd</groupId>
+    <groupId>com</groupId>
     <artifactId>svbd</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>svbd</name>
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>20</maven.compiler.source>
+        <maven.compiler.target>20</maven.compiler.target>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.9.1</junit.version>
+        <hibernate.version>6.2.7.Final</hibernate.version>
         <poi.version>5.2.3</poi.version>
         <h2database.verion>2.1.210</h2database.verion>
     </properties>
@@ -91,7 +92,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>6.2.7.Final</version>
+            <version>${hibernate.version}</version>
         </dependency>
 
         <dependency>
