@@ -48,10 +48,4 @@ public class ShiftManagementService {
         updateShift.getShiftRows().addAll(shiftRows);
         shiftService.updateShift(updateShift);
     }
-
-    private void createShift(Shift shift) {
-    }
-
-    private void updateShift(Shift shift) {
-    }
 }

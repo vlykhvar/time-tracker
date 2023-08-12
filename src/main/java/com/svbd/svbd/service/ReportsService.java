@@ -17,10 +17,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.svbd.svbd.enums.ColorRgb.*;
@@ -96,7 +93,7 @@ public class ReportsService {
         cell = row.createCell(5);
         cell.setCellValue("Робочих годин");
         cell = row.createCell(6);
-        cell.setCellValue("Робочих годин");
+        cell.setCellValue("Всього годин");
         row = sheet.createRow(3);
         cell = row.createCell(0);
         cell.setCellValue(CASH_ON_MORNING_FIELD);
@@ -135,9 +132,15 @@ public class ReportsService {
 
         var startRow = 3;
 
-        for (var shiftRow : shift.getShiftRows()) {
+        var sortedRows = shift.getShiftRows().stream().sorted(Comparator.comparing(x -> x.getEmployee().getName())).toList();
+
+        for (var shiftRow : sortedRows) {
             var startCell = 2;
-            row = sheet.getRow(startRow);
+            if (isNull(sheet.getRow(startRow))) {
+                row = sheet.createRow(startRow);
+            } else {
+                row = sheet.getRow(startRow);
+            }
             cell = row.createCell(startCell);
             cell.setCellValue(shiftRow.getEmployee().getName());
             cell = row.createCell(++startCell);
