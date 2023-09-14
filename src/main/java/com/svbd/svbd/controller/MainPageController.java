@@ -1,8 +1,10 @@
 package com.svbd.svbd.controller;
 
 import com.svbd.svbd.controller.customfield.NumberField;
+import com.svbd.svbd.dto.shift.ShiftRequestBO;
 import com.svbd.svbd.dto.shift.ShiftBO;
 import com.svbd.svbd.dto.shift.row.ShiftRowBO;
+import com.svbd.svbd.dto.shift.row.ShiftRowRequestBO;
 import com.svbd.svbd.exception.IncorrectPasswordException;
 import com.svbd.svbd.service.EmployeeManagementService;
 import com.svbd.svbd.service.ReportsService;
@@ -31,10 +33,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.svbd.svbd.enums.Pages.REPORTS_PAGE;
@@ -137,7 +136,7 @@ public class MainPageController extends Application implements Initializable {
 
     @FXML
     void saveShift() throws Exception {
-        var shift = new ShiftBO();
+        var shift = new ShiftRequestBO();
         shift.setDate(datePicker.valueProperty().get());
         shift.setTaxi(checkAndChangeStringToLong(taxi));
         shift.setCashKeyOnEvening(checkAndChangeStringToLong(cashKeyOnEvening));
@@ -148,11 +147,16 @@ public class MainPageController extends Application implements Initializable {
         shift.setCashOnMorning(checkAndChangeStringToLong(cashOnMorning));
         shift.setTotalCash(checkAndChangeStringToLong(totalCash));
         shift.setBonusTime(checkAndChangeStringToLong(bonusTime));
-        var rows = shitEmployeeData.getItems().stream()
-                .filter(row -> nonNull(row.getStartShift()) && !row.getStartShift().isEmpty() || nonNull(row.getShiftRowId()))
-                .collect(Collectors.toSet());;
-        isCorrectTime(rows);
-            shiftManagementService.creatOrUpdate(shift, rows);
+        var rows = new HashSet<ShiftRowRequestBO>();
+        for (ShiftRowBO row : shitEmployeeData.getItems()) {
+            if (nonNull(row.getStartShift()) && !row.getStartShift().isEmpty() ||
+                    nonNull(row.getShiftRowId())) {
+                var shiftRowRequestBO = toShiftRowRequestBO(row);
+                rows.add(shiftRowRequestBO);
+            }
+        }
+        shift.getShiftRowBOs().addAll(rows);
+        shiftManagementService.creatOrUpdate(shift);
         prepareData();
     }
 
@@ -357,15 +361,38 @@ public class MainPageController extends Application implements Initializable {
             return 0;
     }
 
-    private void isCorrectTime(Collection<ShiftRowBO> rowBOs) throws Exception {
-        for (var row : rowBOs) {
-            if (prepareTotalTime(row.getStartShift(), row.getEndShift()) >= 0) {
-                continue;
+    private ShiftRowRequestBO toShiftRowRequestBO(ShiftRowBO shiftRowBO) throws Exception {
+        var shiftRowRequest = new ShiftRowRequestBO();
+        if (prepareTotalTime(shiftRowBO.getStartShift(), shiftRowBO.getEndShift()) >= 0) {
+            shiftRowRequest.setEmployeeId(shiftRowBO.getEmployeeId());
+            shiftRowRequest.setEmployeeName(shiftRowBO.getEmployeeName());
+            shiftRowRequest.setShiftRowId(shiftRowBO.getShiftRowId());
+            shiftRowRequest.setShiftDate(datePicker.getValue());
+            var currentDate = datePicker.getValue();
+            var startShiftTime = LocalTime.parse(shiftRowBO.getStartShift());
+            var endShiftTime = LocalTime.parse(shiftRowBO.getEndShift());
+            LocalDateTime startShiftLocalDateTime;
+            if (startShiftTime.getHour() < 7) {
+                startShiftLocalDateTime = LocalDateTime.of(currentDate.plusDays(1), startShiftTime);
+            } else {
+                startShiftLocalDateTime = LocalDateTime.of(currentDate, startShiftTime);
             }
+            LocalDateTime endShiftLocalDateTime;
+            if (endShiftTime.getHour() > 0 && endShiftTime.getHour() < 8) {
+                endShiftLocalDateTime = LocalDateTime.of(currentDate.plusDays(1L), endShiftTime);
+            } else {
+                endShiftLocalDateTime = LocalDateTime.of(currentDate, endShiftTime);
+            }
+            shiftRowRequest.setStartShift(startShiftLocalDateTime);
+            shiftRowRequest.setEndShift(endShiftLocalDateTime);
+            shiftRowRequest.setTotalWorkTime(prepareWorkTotalTime(startShiftLocalDateTime, endShiftLocalDateTime));
+        }
+        if (shiftRowRequest.getTotalWorkTime() < 0) {
             showAlert(Alert.AlertType.ERROR, "Невірвно вказаний час",
-                    String.format("Співробітник %s має не вірний час зміни", row.getEmployeeName()));
+                    String.format("Співробітник %s має не вірний час зміни", shiftRowRequest.getEmployeeName()));
             throw new Exception();
         }
+        return shiftRowRequest;
     }
 
     @Override

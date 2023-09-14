@@ -1,5 +1,6 @@
 package com.svbd.svbd.converter;
 
+import com.svbd.svbd.dto.shift.ShiftRequestBO;
 import com.svbd.svbd.dto.shift.ShiftBO;
 import com.svbd.svbd.entity.Shift;
 
@@ -27,8 +28,7 @@ public final class ShiftConverter {
         return shiftBO;
     }
 
-    public static Shift enrichShiftDate(Shift shift, ShiftBO shiftBO) {
-        shift.setShiftDate(shiftBO.getDate());
+    public static Shift enrichShiftDate(Shift shift, ShiftRequestBO shiftBO) {
         shift.setCashKeyOnEvening(shiftBO.getCashKeyOnEvening());
         shift.setCashKeyOnMorning(shiftBO.getCashKeyOnMorning());
         shift.setCashKeyTotal(shiftBO.getCashKeyTotal());

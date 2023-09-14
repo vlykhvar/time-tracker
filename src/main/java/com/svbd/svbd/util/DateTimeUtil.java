@@ -41,7 +41,12 @@ public final class DateTimeUtil {
     public static Integer prepareWorkTotalTime(LocalDate shiftDate,
                                                LocalTime startEmployeeShift,
                                                LocalTime endEmployeeShift) {
-        var startShiftLocalDateTime = LocalDateTime.of(shiftDate, startEmployeeShift);
+        LocalDateTime startShiftLocalDateTime;
+        if (startEmployeeShift.getHour() < 7) {
+            startShiftLocalDateTime = LocalDateTime.of(shiftDate.plusDays(1), startEmployeeShift);
+        } else {
+            startShiftLocalDateTime = LocalDateTime.of(shiftDate, startEmployeeShift);
+        }
         LocalDateTime endShiftLocalDateTime;
         if (endEmployeeShift.getHour() > 0 && endEmployeeShift.getHour() < 8) {
             endShiftLocalDateTime = LocalDateTime.of(shiftDate.plusDays(1L), endEmployeeShift);

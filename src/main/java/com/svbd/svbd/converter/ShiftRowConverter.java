@@ -1,18 +1,17 @@
 package com.svbd.svbd.converter;
 
 import com.svbd.svbd.dto.shift.row.ShiftRowBO;
+import com.svbd.svbd.dto.shift.row.ShiftRowRequestBO;
 import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.entity.Shift;
 import com.svbd.svbd.entity.ShiftRow;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.svbd.svbd.util.DateTimeUtil.*;
-import static java.util.Objects.isNull;
+import static com.svbd.svbd.util.DateTimeUtil.getStringHourAndMinuteFromLocalDateTime;
 
 public final class ShiftRowConverter {
 
@@ -36,22 +35,20 @@ public final class ShiftRowConverter {
                 .collect(Collectors.toSet());
     }
 
-    public static ShiftRow toShiftRow(LocalDate shiftDate, ShiftRowBO shiftRowBO) {
+    public static ShiftRow toShiftRow(ShiftRowRequestBO shiftRowBO) {
         var shiftRow = new ShiftRow();
         shiftRow.setId(shiftRowBO.getShiftRowId());
         shiftRow.setEmployee(new Employee(shiftRowBO.getEmployeeId()));
-        shiftRow.setShift(new Shift(shiftDate));
-        shiftRow.setStartShift(isNull(shiftRowBO.getStartShift()) || shiftRowBO.getStartShift().isEmpty() ? null :
-                toLocalDateTime(shiftDate, shiftRowBO.getStartShift()));
-        shiftRow.setEndShift(isNull(shiftRowBO.getEndShift()) || shiftRowBO.getEndShift().isEmpty() ? null :
-                prepareNightShiftEndDate(shiftDate, shiftRowBO.getEndShift()));
-        shiftRow.setTotalTime(prepareWorkTotalTime(shiftRow.getStartShift(), shiftRow.getEndShift()));
+        shiftRow.setShift(new Shift(shiftRowBO.getShiftDate()));
+        shiftRow.setStartShift(shiftRowBO.getStartShift());
+        shiftRow.setEndShift(shiftRowBO.getEndShift());
+        shiftRow.setTotalTime(shiftRowBO.getTotalWorkTime());
         return shiftRow;
     }
 
-    public static List<ShiftRow> toShiftRow(LocalDate shiftDate, Collection<ShiftRowBO> shiftRowBOs) {
+    public static List<ShiftRow> toShiftRow(Collection<ShiftRowRequestBO> shiftRowBOs) {
         return shiftRowBOs.stream()
-                .map(row -> toShiftRow(shiftDate, row))
+                .map(ShiftRowConverter::toShiftRow)
                 .toList();
     }
 }
