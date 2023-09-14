@@ -27,7 +27,7 @@ public final class EmployeeConverter {
         return employeeWithLastSalary;
     }
 
-    public static List<EmployeeWithLastSalaryBO> toEmployeeWithLastSalaryBOs(Collection<Employee> employees) {
+    public static List<EmployeeWithLastSalaryBO> toEmployeeBOs(Collection<Employee> employees) {
         return employees.stream()
                 .map(EmployeeConverter::toEmployeeWithLastSalaryBO)
                 .toList();

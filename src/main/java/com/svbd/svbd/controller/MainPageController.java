@@ -3,8 +3,10 @@ package com.svbd.svbd.controller;
 import com.svbd.svbd.controller.customfield.NumberField;
 import com.svbd.svbd.dto.shift.ShiftBO;
 import com.svbd.svbd.dto.shift.row.ShiftRowBO;
+import com.svbd.svbd.exception.IncorrectPasswordException;
 import com.svbd.svbd.service.EmployeeManagementService;
 import com.svbd.svbd.service.ReportsService;
+import com.svbd.svbd.service.SettingsManagementService;
 import com.svbd.svbd.service.ShiftManagementService;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -36,7 +38,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static com.svbd.svbd.enums.Pages.REPORTS_PAGE;
-import static com.svbd.svbd.enums.Pages.TABLE_EMPLOYEE;
+import static com.svbd.svbd.enums.Pages.SETTINGS_PAGE;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
 import static com.svbd.svbd.util.ConstantUtil.TIME_REGEX;
 import static com.svbd.svbd.util.DateTimeUtil.prepareWorkTotalTime;
@@ -48,9 +50,10 @@ public class MainPageController extends Application implements Initializable {
 
     private final ShiftManagementService shiftManagementService = new ShiftManagementService();
     private final EmployeeManagementService employeeManagementService = new EmployeeManagementService();
+    private final SettingsManagementService settingsManagementService = new SettingsManagementService();
     private final ReportsService reportsService = new ReportsService();
 
-    public Menu mangement;
+    public Menu management;
 
     @FXML
     private MenuItem about;
@@ -133,11 +136,6 @@ public class MainPageController extends Application implements Initializable {
     }
 
     @FXML
-    void showEmployeeScene(ActionEvent event) throws IOException {
-        showStage(TABLE_EMPLOYEE);
-    }
-
-    @FXML
     void saveShift() throws Exception {
         var shift = new ShiftBO();
         shift.setDate(datePicker.valueProperty().get());
@@ -152,7 +150,7 @@ public class MainPageController extends Application implements Initializable {
         shift.setBonusTime(checkAndChangeStringToLong(bonusTime));
         var rows = shitEmployeeData.getItems().stream()
                 .filter(row -> nonNull(row.getStartShift()) && !row.getStartShift().isEmpty() || nonNull(row.getShiftRowId()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet());;
         isCorrectTime(rows);
             shiftManagementService.creatOrUpdate(shift, rows);
         prepareData();
@@ -172,7 +170,12 @@ public class MainPageController extends Application implements Initializable {
     }
 
     @FXML
-    void validateUser() throws IOException {
+    void showSettings() throws IOException {
+        showStage(SETTINGS_PAGE);
+    };
+
+    @FXML
+    void validateUser() throws IncorrectPasswordException {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Необхідна автентифікація");
         dialog.setHeaderText("Для входу в розділ управління необхідно введення пароля.");
@@ -183,7 +186,7 @@ public class MainPageController extends Application implements Initializable {
         HBox content = new HBox();
         content.setAlignment(Pos.CENTER_LEFT);
         content.setSpacing(10);
-        content.getChildren().addAll(new Label("Введіть пароль для входу:"), pwd);
+        content.getChildren().addAll(new Label("Введіть пароль для продовження:"), pwd);
         dialog.getDialogPane().setContent(content);
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
@@ -193,11 +196,12 @@ public class MainPageController extends Application implements Initializable {
         });
 
         Optional<String> result = dialog.showAndWait();
-        var password = result.orElseThrow(IOException::new);
-        if ("1234".equals(password)) {
-            return;
+        var password = result.orElseThrow(IncorrectPasswordException::new);
+        var requiredPassword = settingsManagementService.getCompanySettings().getCompanyPassword();
+        if (!requiredPassword.equals(password)) {
+            showAlert(Alert.AlertType.ERROR, "Не вірний пароль", "Не вірний пароль");
+            throw new IncorrectPasswordException();
         }
-        throw new IOException();
     }
 
     @Override
@@ -294,9 +298,13 @@ public class MainPageController extends Application implements Initializable {
     private void prepareShitRowTableWithData(Collection<ShiftRowBO> rowBOs) {
         var excludeIds = rowBOs.stream().map(ShiftRowBO::getEmployeeId).collect(Collectors.toSet());
         var employees = employeeManagementService.getAllShortEmployeesDataExcludeIds(excludeIds);
-        var emptyRowsWithEmployee = employees.stream().map(ShiftRowBO::new).collect(Collectors.toSet());
+        var emptyRowsWithEmployee = employees.stream()
+                .map(ShiftRowBO::new)
+                .collect(Collectors.toSet());
         rowBOs.addAll(emptyRowsWithEmployee);
-        rowBOs = rowBOs.stream().sorted(Comparator.comparing(ShiftRowBO::getEmployeeName)).toList();
+        rowBOs = rowBOs.stream()
+                .sorted(Comparator.comparing(ShiftRowBO::getEmployeeName))
+                .toList();
         shitEmployeeData.getItems().clear();
         shitEmployeeData.getItems().addAll(rowBOs);
     }

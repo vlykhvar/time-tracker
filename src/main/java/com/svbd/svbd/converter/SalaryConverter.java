@@ -20,8 +20,8 @@ public final class SalaryConverter {
         var salaryBO = new SalaryBO();
         salaryBO.setId(salary.getSalaryId());
         salaryBO.setAnHour(salary.getAnHour());
-        salaryBO.setStartDate(formatDateForShowing(salary.getCreateAt()));
-        salaryBO.setEndDate(formatDateForShowing(salary.getRemovedAt()));
+        salaryBO.setStartDate(formatDateForShowing(salary.getDateFrom()));
+        salaryBO.setEndDate(formatDateForShowing(salary.getDateTo()));
         return salaryBO;
     }
 
@@ -36,8 +36,8 @@ public final class SalaryConverter {
         salary.setSalaryId(salaryBO.getId());
         salary.setEmployee(new Employee(salaryBO.getEmployeeId()));
         salary.setAnHour(salaryBO.getAnHour());
-        salary.setCreateAt(parseLocalDate(salaryBO.getStartDate()));
-        salary.setRemovedAt(parseLocalDate(salaryBO.getEndDate()));
+        salary.setDateFrom(parseLocalDate(salaryBO.getStartDate()));
+        salary.setDateTo(parseLocalDate(salaryBO.getEndDate()));
         return salary;
     }
 

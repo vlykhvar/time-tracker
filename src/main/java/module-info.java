@@ -24,6 +24,7 @@ module com.svbd.svbd {
     opens com.svbd.svbd.dto.salary to javafx.base;
     opens com.svbd.svbd.service to javafx.base, javafx.fxml;
     opens com.svbd.svbd.dto.report to javafx.base, javafx.fxml;
+    opens com.svbd.svbd.dto.settings to javafx.base, javafx.fxml;
 
     exports com.svbd.svbd;
     exports com.svbd.svbd.settings;

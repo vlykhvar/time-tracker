@@ -13,6 +13,8 @@
         <mapping class="com.svbd.svbd.entity.Salary"/>
         <mapping class="com.svbd.svbd.entity.Shift"/>
         <mapping class="com.svbd.svbd.entity.ShiftRow"/>
+        <mapping class="com.svbd.svbd.entity.CompanySettings"/>
+        <mapping class="com.svbd.svbd.entity.DinnerSetting"/>
         <!-- <property name="connection.username"/> -->
         <!-- <property name="connection.password"/> -->
 

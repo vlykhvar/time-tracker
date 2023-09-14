@@ -7,18 +7,19 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Table(name = "employee")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Employee extends CreatedAtRemovedAt {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "EMPLOYEE_ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name = "employee_id")
     private Long employeeId;
 
-    @Column(name = "NAME")
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "PHONE_NUMBER")
+    @Column(name = "phone_number")
     private String phoneNumber;
 
     @OneToMany(mappedBy = "employee", orphanRemoval = true, cascade = CascadeType.ALL)

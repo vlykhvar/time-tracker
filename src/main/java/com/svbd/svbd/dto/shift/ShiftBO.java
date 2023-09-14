@@ -17,6 +17,7 @@ public class ShiftBO {
     private Long cashKeyOnMorning;
     private Long cashKeyTotal;
     private Long taxi;
+    private Long totalDinner;
     private String comments;
 
     private final List<ShiftRowBO> rows = new ArrayList<>();
@@ -103,5 +104,13 @@ public class ShiftBO {
 
     public void setBonusTime(Long bonusTime) {
         this.bonusTime = bonusTime;
+    }
+
+    public Long getTotalDinner() {
+        return totalDinner;
+    }
+
+    public void setTotalDinner(Long totalDinner) {
+        this.totalDinner = totalDinner;
     }
 }

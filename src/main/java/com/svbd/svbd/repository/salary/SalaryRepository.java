@@ -34,7 +34,7 @@ public class SalaryRepository {
         var query = session.createQuery(
                 "SELECT new com.svbd.svbd.repository.projection.SalaryEmployeeProjection(e.id, s.anHour) " +
                         "FROM Salary s JOIN s.employee e WHERE e.id IN :employeeIds " +
-                        "AND (:date >= s.createAt AND (s.removedAt IS NULL OR :date <= s.removedAt))",
+                        "AND (:date >= s.dateFrom AND (s.dateTo IS NULL OR :date <= s.dateTo))",
                 SalaryEmployeeProjection.class);
         query.setParameter("date", date);
         query.setParameterList("employeeIds", employeeIds);

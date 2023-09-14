@@ -4,6 +4,8 @@ import com.svbd.svbd.dto.report.MainReport;
 import com.svbd.svbd.entity.Shift;
 import com.svbd.svbd.enums.ColorRgb;
 import com.svbd.svbd.repository.projection.EmployShiftSalaryProjection;
+import com.svbd.svbd.repository.settings.CompanySettingsRepository;
+import com.svbd.svbd.repository.settings.DinnerSettingRepository;
 import com.svbd.svbd.repository.shift.ShiftRepository;
 import com.svbd.svbd.repository.shift.ShiftRowRepository;
 import org.apache.poi.ss.usermodel.*;
@@ -31,7 +33,7 @@ import static org.apache.poi.xssf.usermodel.XSSFFont.DEFAULT_FONT_NAME;
 
 public class ReportsService {
 
-    private static final String MAIN_REPORT_HEADER = "Звіт з %s по %s";
+    private static final String MAIN_REPORT_HEADER = "Звіт компанії %s з %s по %s";
     private static final String CASH_ON_MORNING_FIELD = "Каса на ранок";
     private static final String CASH_FIELD = "Каса прокату";
     private static final String CASH_ON_EVENING_FIELD = "Каса на вечір";
@@ -40,8 +42,10 @@ public class ReportsService {
     private static final String CASH_KEY_ON_EVENING_FIELD = "Каса ключі на вечір";
     private static final String TAXI = "Таксі";
 
-    private ShiftRepository shiftRepository = new ShiftRepository();
-    private ShiftRowRepository shiftRowRepository = new ShiftRowRepository();
+    private final ShiftRepository shiftRepository = new ShiftRepository();
+    private final ShiftRowRepository shiftRowRepository = new ShiftRowRepository();
+    private final CompanySettingsRepository companySettingsRepository = new CompanySettingsRepository();
+    private final DinnerSettingRepository dinnerSettingRepository = new DinnerSettingRepository();
 
     public String generateMainRepost(MainReport request) throws IOException {
         var workbook = new XSSFWorkbook();
@@ -132,7 +136,9 @@ public class ReportsService {
 
         var startRow = 3;
 
-        var sortedRows = shift.getShiftRows().stream().sorted(Comparator.comparing(x -> x.getEmployee().getName())).toList();
+        var sortedRows = shift.getShiftRows().stream()
+                .sorted(Comparator.comparing(x -> x.getEmployee().getName()))
+                .toList();
 
         for (var shiftRow : sortedRows) {
             var startCell = 2;
@@ -200,6 +206,7 @@ public class ReportsService {
     /* Private Methods */
 
     private Sheet prepareHeader(XSSFWorkbook workbook, LocalDate from, LocalDate to) {
+        var companyName = companySettingsRepository.getCompanyName();
         Sheet sheet = workbook.createSheet("report");
         Row header = sheet.createRow(0);
         CellStyle headerStyle = workbook.createCellStyle();
@@ -211,7 +218,7 @@ public class ReportsService {
         headerStyle.setFont(font);
         headerStyle.setAlignment(HorizontalAlignment.CENTER);
         Cell headerCell = header.createCell(1);
-        headerCell.setCellValue(String.format(MAIN_REPORT_HEADER, from, to));
+        headerCell.setCellValue(String.format(MAIN_REPORT_HEADER, companyName, from, to));
         headerCell.setCellStyle(headerStyle);
         return sheet;
     }
@@ -240,11 +247,11 @@ public class ReportsService {
                 rowCell.setCellValue(formatDateForShowing(currentDateForRow));
                 i++;
                 rowCell = header.createCell(i);
-                rowCell.setCellValue("Зарлата за вторую половину месяца");
+                rowCell.setCellValue("Заробітня плата за другу половину місяця");
                 rowCell.setCellStyle(cellStyle);
                 i++;
                 rowCell = header.createCell(i);
-                rowCell.setCellValue("Всего за месяц");
+                rowCell.setCellValue("Всього за місяць");
                 rowCell.setCellStyle(prepareCellStyle(workbook, LIGHT_GRAYISH_BLUE, 11, true, MEDIUM));
             } else {
                 rowCell.setCellValue(formatDateForShowing(currentDateForRow));
@@ -385,8 +392,10 @@ public class ReportsService {
     private void prepareShiftRows(Workbook workbook, Sheet sheet, LocalDate from, LocalDate to) {
         var currentDateForRow = from;
         var shifts = shiftRepository.findAllShiftsInPeriod(from, to);
-        var shiftByDate = shifts.stream().collect(Collectors.toMap(Shift::getShiftDate, x -> x));
+        var shiftByDate = shifts.stream()
+                .collect(Collectors.toMap(Shift::getShiftDate, x -> x));
         var rowTaxi = sheet.createRow(sheet.getLastRowNum() + 1);
+        var totalDinner = sheet.createRow(sheet.getLastRowNum() + 1);
         var shiftCash = sheet.createRow(sheet.getLastRowNum() + 1);
         var keyCash = sheet.createRow(sheet.getLastRowNum() + 1);
         var totalCash = sheet.createRow(sheet.getLastRowNum() + 1);
@@ -408,6 +417,9 @@ public class ReportsService {
                 cell = totalCash.createCell(cellPosition);
                 cell.setCellValue("Загальний виторг");
                 cells.add(cell);
+                cell = totalDinner.createCell(cellPosition);
+                cell.setCellValue("Витрати на обід");
+                cells.add(cell);
                 cells.forEach(cellForStyles -> cellForStyles.setCellStyle(
                         prepareCellStyle(workbook, LIGHT_GRAYISH_BLUE, 11, true, MEDIUM)));
                 cellPosition++;
@@ -427,6 +439,9 @@ public class ReportsService {
             cells.add(cell);
             cell = totalCash.createCell(cellPosition);
             cell.setCellValue(nonNull(currentShift) ? currentShift.getCashKeyTotal() + currentShift.getTotalCash() : 0);
+            cells.add(cell);
+            cell = totalDinner.createCell(cellPosition);
+            cell.setCellValue(nonNull(currentShift) ? currentShift.getTotalDinner() : 0);
             cells.add(cell);
             cells.forEach(cellForStyles -> cellForStyles.setCellStyle(
                     prepareCellStyle(workbook, BRIGHT_YELLOW, 11, false, THIN)));
@@ -460,6 +475,11 @@ public class ReportsService {
                 cell = totalCash.createCell(cellPosition);
                 cell.setCellValue(shiftInCurrentPeriods.stream()
                         .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                cell = totalDinner.createCell(cellPosition);
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getTotalDinner)
                         .reduce(0L, Long::sum));
                 cells.add(cell);
                 cells.forEach(cellForStyles -> cellForStyles.setCellStyle(
@@ -496,6 +516,11 @@ public class ReportsService {
                         .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
                         .reduce(0L, Long::sum));
                 cells.add(cell);
+                cell = totalDinner.createCell(cellPosition);
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getTotalDinner)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
                 var shiftsInCurrentMonth = shifts.stream()
                         .filter(employeeShift ->
                                 employeeShift.getShiftDate().getMonth().equals(finalCurrentDateForRow.getMonth()))
@@ -519,6 +544,11 @@ public class ReportsService {
                 cell = totalCash.createCell(cellPosition);
                 cell.setCellValue(shiftsInCurrentMonth.stream()
                         .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
+                cell = totalDinner.createCell(cellPosition);
+                cell.setCellValue(shiftsInCurrentMonth.stream()
+                        .map(Shift::getTotalDinner)
                         .reduce(0L, Long::sum));
                 cells.add(cell);
                 cells.forEach(cellForStyles -> cellForStyles.setCellStyle(

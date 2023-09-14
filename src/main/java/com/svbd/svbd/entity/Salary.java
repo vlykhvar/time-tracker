@@ -2,24 +2,29 @@ package com.svbd.svbd.entity;
 
 import jakarta.persistence.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class Salary extends CreatedAtRemovedAt {
+@Table(name = "salary")
+public class Salary {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Id
-    @Column(name = "SALARY_ID")
+    @Column(name = "salary_id")
     private Long salaryId;
 
-    @Column(name = "AN_HOUR")
+    @Column(name = "an_hour")
     private Long anHour;
 
+    @Column(name = "date_from", nullable = false)
+    private LocalDate dateFrom;
+
+    @Column(name = "date_to")
+    private LocalDate dateTo;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "EMPLOYEE_ID", referencedColumnName = "EMPLOYEE_ID")
+    @JoinColumn(name = "employee_id", referencedColumnName = "employee_id")
     private Employee employee;
 
     public Long getSalaryId() {
@@ -57,6 +62,22 @@ public class Salary extends CreatedAtRemovedAt {
         Salary salary = (Salary) o;
         return Objects.equals(salaryId, salary.salaryId) && Objects.equals(employee, salary.employee) &&
                 Objects.equals(anHour, salary.anHour);
+    }
+
+    public LocalDate getDateFrom() {
+        return dateFrom;
+    }
+
+    public void setDateFrom(LocalDate dateFrom) {
+        this.dateFrom = dateFrom;
+    }
+
+    public LocalDate getDateTo() {
+        return dateTo;
+    }
+
+    public void setDateTo(LocalDate dateTo) {
+        this.dateTo = dateTo;
     }
 
     @Override

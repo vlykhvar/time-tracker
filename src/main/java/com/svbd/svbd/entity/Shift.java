@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "shift")
 public class Shift {
 
     @Id
@@ -35,6 +36,9 @@ public class Shift {
 
     @Column(name = "bonus_time")
     private Long bonusTime;
+
+    @Column(name = "total_dinner")
+    private Long totalDinner;
 
     @Column(name = "comments", length = 10000)
     private String comments;
@@ -135,5 +139,13 @@ public class Shift {
 
     public void setBonusTime(Long bonusTime) {
         this.bonusTime = bonusTime;
+    }
+
+    public Long getTotalDinner() {
+        return totalDinner;
+    }
+
+    public void setTotalDinner(Long totalDinner) {
+        this.totalDinner = totalDinner;
     }
 }

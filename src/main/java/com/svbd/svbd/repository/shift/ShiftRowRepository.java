@@ -51,13 +51,13 @@ public class ShiftRowRepository {
         var session = HibernateModule.getSessionFactory().openSession();
         var query = session.createNativeQuery(
                 """
-                      SELECT e.EMPLOYEE_ID as employeeId, e.NAME as name, sr.SHIFT_DATE as shiftDate, 
-                      coalesce((s.AN_HOUR * (sr.TOTAL_TIME + s2.BONUS_TIME)), 0) as salary 
-                      FROM ShiftRow sr INNER JOIN Employee E on E.EMPLOYEE_ID = sr.EMPLOYEE_ID 
-                      LEFT JOIN SALARY S on E.EMPLOYEE_ID = S.EMPLOYEE_ID AND (S.CREATE_AT <= sr.SHIFT_DATE) 
-                      AND (S.REMOVED_AT IS NULL OR S.REMOVED_AT >= sr.SHIFT_DATE)
-                      LEFT JOIN SHIFT S2 on S2.SHIFT_DATE = sr.SHIFT_DATE 
-                      WHERE sr.SHIFT_DATE >= :from AND sr.shift_date <= :to
+                      SELECT e.employee_id as employeeId, e.name as name, sr.shift_date as shiftDate,
+                      coalesce((s.AN_HOUR * (sr.TOTAL_TIME + sh.BONUS_TIME)), 0) as salary
+                      FROM shift_row sr INNER JOIN employee e on e.EMPLOYEE_ID = sr.EMPLOYEE_ID 
+                      LEFT JOIN salary s on e.EMPLOYEE_ID = s.EMPLOYEE_ID AND (s.date_from <= sr.SHIFT_DATE) 
+                      AND (s.date_to IS NULL OR s.date_to >= sr.shift_date)
+                      LEFT JOIN shift sh on sh.SHIFT_DATE = sr.SHIFT_DATE 
+                      WHERE sr.SHIFT_DATE >= :from AND sr.shift_date <= :to 
                         """);
         query.setParameter("from", from);
         query.setParameter("to", to);

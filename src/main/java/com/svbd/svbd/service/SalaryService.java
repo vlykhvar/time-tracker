@@ -14,7 +14,7 @@ public class SalaryService {
     private final SalaryRepository repository = new SalaryRepository();
 
     public Long createSalary(Salary salary) throws HibernateException {
-        salary.setCreateAt(LocalDate.now());
+        salary.setDateFrom(LocalDate.now());
         return repository.createSalary(salary);
     }
 

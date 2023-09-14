@@ -2,16 +2,18 @@ package com.svbd.svbd.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 
 @MappedSuperclass
 public abstract class CreatedAtRemovedAt {
 
-    @Column(name = "CREATE_AT")
+    @CreationTimestamp
+    @Column(name = "create_at")
     private LocalDate createAt;
 
-    @Column(name = "REMOVED_AT")
+    @Column(name = "removed_at")
     private LocalDate removedAt;
 
 

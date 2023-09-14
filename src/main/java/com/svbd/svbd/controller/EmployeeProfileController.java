@@ -4,7 +4,6 @@ import com.svbd.svbd.controller.customfield.NumberField;
 import com.svbd.svbd.dto.employee.EmployeeBO;
 import com.svbd.svbd.dto.salary.SalaryBO;
 import com.svbd.svbd.enums.Exceptions;
-import com.svbd.svbd.enums.Pages;
 import com.svbd.svbd.exception.OverlapingDateException;
 import com.svbd.svbd.exception.StartDateAfterEndDateException;
 import com.svbd.svbd.service.EmployeeManagementService;
@@ -28,7 +27,7 @@ import java.util.stream.Collectors;
 import static com.svbd.svbd.enums.Exceptions.START_DATE_AFTER_EXCEPTION;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
 import static com.svbd.svbd.util.DateTimeUtil.parseLocalDate;
-import static com.svbd.svbd.util.StageUtil.changeStage;
+import static com.svbd.svbd.util.StageUtil.closeCurrentStage;
 import static java.util.Objects.nonNull;
 
 public class EmployeeProfileController implements Initializable {
@@ -84,7 +83,7 @@ public class EmployeeProfileController implements Initializable {
     void saveEmployee() throws IOException {
         try {
             employeeManagementService.updateEmployee(prepareEmployeeBO());
-            changeStage((Stage) save.getScene().getWindow(), Pages.TABLE_EMPLOYEE);
+            closeCurrentStage((Stage) save.getScene().getWindow());
         } catch (OverlapingDateException e) {
             showAlert(Exceptions.DATE_OVERLAPPING_EXCEPTION);
         }

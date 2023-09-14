@@ -70,8 +70,7 @@ public class EmployeeRepository {
 
     public List<Employee> findAllRemovedAtIsNull() {
         var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createQuery(
-                        "SELECT e FROM Employee e WHERE e.removedAt IS NULL",
+        var query = session.createQuery("SELECT e FROM Employee e WHERE e.removedAt IS NULL ORDER BY e.name ASC",
                         Employee.class);
         var result = query.getResultList();
         session.close();

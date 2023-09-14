@@ -68,4 +68,8 @@ public final class DateTimeUtil {
         }
         return endShiftLocalDateTime;
     }
+
+    public static boolean validateStartAndEndDate(LocalDate startDate, LocalDate endDate) {
+        return isNull(endDate) || startDate.isAfter(endDate);
+    }
 }

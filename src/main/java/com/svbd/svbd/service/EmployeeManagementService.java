@@ -3,16 +3,13 @@ package com.svbd.svbd.service;
 import com.svbd.svbd.dto.employee.EmployeeBO;
 import com.svbd.svbd.dto.employee.EmployeeShortBO;
 import com.svbd.svbd.dto.employee.EmployeeWithLastSalaryBO;
-import com.svbd.svbd.entity.CreatedAtRemovedAt;
 import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.entity.Salary;
 import com.svbd.svbd.exception.OverlapingDateException;
 import com.svbd.svbd.repository.employee.EmployeeRepository;
-import com.svbd.svbd.repository.projection.SalaryEmployeeProjection;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.svbd.svbd.converter.EmployeeConverter.*;
 import static java.util.Objects.isNull;
@@ -45,16 +42,7 @@ public class EmployeeManagementService {
     }
 
     public List<EmployeeWithLastSalaryBO> getEmployeesWithLastSalaryBO() {
-        var employees = employeeService.findAllActiveEmployee();
-        var employeeIds = employees.stream().map(Employee::getEmployeeId).collect(Collectors.toSet());
-        var salaryByEmployeeId = salaryService.getActualSalaryForEmployees(employeeIds).stream()
-                .collect(Collectors.toMap(SalaryEmployeeProjection::employeeId, SalaryEmployeeProjection::anHour));
-        var employeeBOs = toEmployeeWithLastSalaryBOs(employees);
-        employeeBOs.forEach(employeeWithLastSalaryBO -> employeeWithLastSalaryBO.setPerHour(
-                salaryByEmployeeId.getOrDefault(employeeWithLastSalaryBO.getId(), 0L))
-        );
-
-        return employeeBOs;
+        return toEmployeeBOs(employeeService.findAllActiveEmployee());
     }
 
     public EmployeeBO getEmployee(Long employeeId) throws Exception {
@@ -70,7 +58,7 @@ public class EmployeeManagementService {
         var salaries = employee.getSalaries();
         for (var salary : salaries) {
             if (nonNull(salary.getSalaryId()) &&
-                    (isNull(salary.getCreateAt()) || isNull(salary.getAnHour()))) {
+                    (isNull(salary.getDateFrom()) || isNull(salary.getAnHour()))) {
                 salaryIdsForDelete.add(salary.getSalaryId());
             } else {
                 salariesForChecking.add(salary);
@@ -83,11 +71,11 @@ public class EmployeeManagementService {
     }
 
     private List<Salary> adjustingAndCheckingSalaryDates(Collection<Salary> salaries) {
-        if (salaries.size() < 1) {
+        if (salaries.isEmpty()) {
             return new ArrayList<>(salaries);
         }
         var salaryForChecking = new ArrayList<>(salaries.stream()
-                .sorted(Comparator.comparing(CreatedAtRemovedAt::getCreateAt)).toList());
+                .sorted(Comparator.comparing(Salary::getDateFrom)).toList());
         Salary lastCreatedSalary = null;
 
         for (int i = 1; i < salaryForChecking.size(); i++) {
@@ -95,13 +83,13 @@ public class EmployeeManagementService {
             var currentSalary = salaryForChecking.get(i);
 
 
-            if (isNull(previosSalary.getRemovedAt()) ||
-                    !previosSalary.getRemovedAt().plusDays(1).isEqual(currentSalary.getCreateAt())) {
-                previosSalary.setRemovedAt(currentSalary.getCreateAt().minusDays(1));
+            if (isNull(previosSalary.getDateTo()) ||
+                    !previosSalary.getDateTo().plusDays(1).isEqual(currentSalary.getDateFrom())) {
+                previosSalary.setDateTo(currentSalary.getDateFrom().minusDays(1));
             }
 
-            if (previosSalary.getCreateAt().isEqual(currentSalary.getCreateAt()) ||
-                    previosSalary.getRemovedAt().isEqual(currentSalary.getCreateAt())) {
+            if (previosSalary.getDateFrom().isEqual(currentSalary.getDateFrom()) ||
+                    previosSalary.getDateTo().isEqual(currentSalary.getDateFrom())) {
                 throw new OverlapingDateException();
             }
 
@@ -123,12 +111,12 @@ public class EmployeeManagementService {
             return;
         }
         var sortedSalaries = salaries.stream()
-                .sorted(Comparator.comparing(Salary::getCreateAt))
+                .sorted(Comparator.comparing(Salary::getDateFrom))
                 .toList();
 
         for (int i = 1; i < sortedSalaries.size(); i++) {
-            if (isDateInRange(sortedSalaries.get(0).getCreateAt(), sortedSalaries.get(i)) ||
-                    isDateInRange(sortedSalaries.get(0).getRemovedAt(), sortedSalaries.get(i))) {
+            if (isDateInRange(sortedSalaries.get(0).getDateFrom(), sortedSalaries.get(i)) ||
+                    isDateInRange(sortedSalaries.get(0).getDateTo(), sortedSalaries.get(i))) {
                 throw new OverlapingDateException();
             }
         }
@@ -136,7 +124,7 @@ public class EmployeeManagementService {
     }
 
     private boolean isDateInRange(LocalDate date, Salary salary) {
-        return date.isAfter(salary.getCreateAt()) && date.isAfter(salary.getRemovedAt()) &&
-                !date.isEqual(salary.getCreateAt()) && !date.isEqual(salary.getRemovedAt());
+        return date.isAfter(salary.getDateFrom()) && date.isAfter(salary.getDateTo()) &&
+                !date.isEqual(salary.getDateFrom()) && !date.isEqual(salary.getDateTo());
     }
 }
