@@ -1,10 +1,11 @@
 package com.svbd.svbd.service;
 
+import com.svbd.svbd.entity.Shift;
 import com.svbd.svbd.exception.ShiftNotFoundException;
 import com.svbd.svbd.repository.shift.ShiftRepository;
-import com.svbd.svbd.entity.Shift;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class ShiftService {
 
@@ -28,5 +29,9 @@ public class ShiftService {
 
     public boolean existShiftByDate(LocalDate date) {
         return repository.existRowByDate(date);
+    }
+
+    public List<Shift> findAllByPeriod(LocalDate dateFrom, LocalDate dateTo) {
+        return repository.findAllShiftsInPeriod(dateFrom, dateTo);
     }
 }

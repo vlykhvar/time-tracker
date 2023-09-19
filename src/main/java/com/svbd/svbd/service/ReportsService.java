@@ -5,7 +5,6 @@ import com.svbd.svbd.entity.Shift;
 import com.svbd.svbd.enums.ColorRgb;
 import com.svbd.svbd.repository.projection.EmployShiftSalaryProjection;
 import com.svbd.svbd.repository.settings.CompanySettingsRepository;
-import com.svbd.svbd.repository.settings.DinnerSettingRepository;
 import com.svbd.svbd.repository.shift.ShiftRepository;
 import com.svbd.svbd.repository.shift.ShiftRowRepository;
 import org.apache.poi.ss.usermodel.*;
@@ -45,7 +44,6 @@ public class ReportsService {
     private final ShiftRepository shiftRepository = new ShiftRepository();
     private final ShiftRowRepository shiftRowRepository = new ShiftRowRepository();
     private final CompanySettingsRepository companySettingsRepository = new CompanySettingsRepository();
-    private final DinnerSettingRepository dinnerSettingRepository = new DinnerSettingRepository();
 
     public String generateMainRepost(MainReport request) throws IOException {
         var workbook = new XSSFWorkbook();
@@ -176,9 +174,10 @@ public class ReportsService {
                 continue;
             }
             for (int b = 0; b <= row.getPhysicalNumberOfCells(); b++) {
+                sheet.autoSizeColumn(b);
                 cell = row.getCell(b);
                 if (nonNull(cell)) {
-                    cell.setCellStyle(prepareCellStyle(workbook, WHITE, 11, false, THIN));
+                    cell.setCellStyle(prepareCellStyle(workbook, WHITE, 13, false, THIN));
                 }
             }
         }
@@ -189,11 +188,6 @@ public class ReportsService {
         sheet.addMergedRegion(new CellRangeAddress(1, 2, 0, 1));
         sheet.addMergedRegion(new CellRangeAddress(1, 2, 2, 2));
 
-        int b = 0;
-        while (b < sheet.getRow(0).getPhysicalNumberOfCells()) {
-            sheet.autoSizeColumn(b);
-            b++;
-        }
         var currDir = new File(".");
         var path = currDir.getAbsolutePath();
         var fileLocation = path.substring(0, path.length() - 1) + "daily.xls";

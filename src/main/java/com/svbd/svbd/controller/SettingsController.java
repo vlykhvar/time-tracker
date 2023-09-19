@@ -9,6 +9,7 @@ import com.svbd.svbd.entity.Salary;
 import com.svbd.svbd.exception.OverlapingDateException;
 import com.svbd.svbd.service.EmployeeManagementService;
 import com.svbd.svbd.service.SettingsManagementService;
+import com.svbd.svbd.service.ShiftManagementService;
 import com.svbd.svbd.util.DataHolder;
 import com.svbd.svbd.util.DateTimeUtil;
 import com.svbd.svbd.util.StageUtil;
@@ -41,6 +42,7 @@ public class SettingsController extends Application implements Initializable {
 
     private final EmployeeManagementService employeeManagementService = new EmployeeManagementService();
     private final SettingsManagementService settingsManagementService = new SettingsManagementService();
+    private final ShiftManagementService shiftManagementService = new ShiftManagementService();
 
     @FXML
     private Button buttonId;
@@ -193,6 +195,7 @@ public class SettingsController extends Application implements Initializable {
         dinnerBO.setDateFrom(DateTimeUtil.formatDateForShowing(startDate));
         try {
             settingsManagementService.createDinnerSettings(dinnerBO);
+            shiftManagementService.updateShiftsByDinnerSettings(dinnerBO);
         } catch (OverlapingDateException e) {
             showAlert(Alert.AlertType.ERROR, "Періоди накладаются", "Періоди перекриваются");
         }
@@ -208,6 +211,7 @@ public class SettingsController extends Application implements Initializable {
             showAlert(Alert.AlertType.ERROR, "Не корректні дати", "Дата кінця зміни не може бути після початку");
         }
         prepareDinnerColumn();
+        dinnerTable.getItems().forEach(shiftManagementService::updateShiftsByDinnerSettings);
     }
 
     /*Private methods*/

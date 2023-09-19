@@ -29,6 +29,7 @@ public final class ShiftConverter {
     }
 
     public static Shift enrichShiftDate(Shift shift, ShiftRequestBO shiftBO) {
+        shift.setShiftDate(shiftBO.getDate());
         shift.setCashKeyOnEvening(shiftBO.getCashKeyOnEvening());
         shift.setCashKeyOnMorning(shiftBO.getCashKeyOnMorning());
         shift.setCashKeyTotal(shiftBO.getCashKeyTotal());

@@ -1,12 +1,12 @@
 package com.svbd.svbd.service;
 
+import com.svbd.svbd.dto.settings.DinnerSettingBO;
 import com.svbd.svbd.dto.shift.ShiftBO;
 import com.svbd.svbd.dto.shift.ShiftRequestBO;
 import com.svbd.svbd.entity.Shift;
 import com.svbd.svbd.entity.ShiftRow;
 import com.svbd.svbd.exception.DinnerNotFoundException;
 import com.svbd.svbd.exception.ShiftNotFoundException;
-import com.svbd.svbd.repository.shift.ShiftRowRepository;
 import jakarta.persistence.Transient;
 
 import java.time.LocalDate;
@@ -15,13 +15,13 @@ import java.util.Objects;
 import static com.svbd.svbd.converter.ShiftConverter.enrichShiftDate;
 import static com.svbd.svbd.converter.ShiftConverter.toShiftBO;
 import static com.svbd.svbd.converter.ShiftRowConverter.toShiftRow;
+import static com.svbd.svbd.util.DateTimeUtil.parseLocalDate;
 import static com.svbd.svbd.util.MathUtil.calculateTotalDinnerPriceForShit;
 import static java.util.Objects.isNull;
 
 public class ShiftManagementService {
 
     private final ShiftService shiftService = new ShiftService();
-    private final ShiftRowRepository rowRepository = new ShiftRowRepository();
     private final SettingsManagementService settingsManagementService = new SettingsManagementService();
 
     public ShiftBO getShiftByDate(LocalDate date) {
@@ -30,16 +30,17 @@ public class ShiftManagementService {
             shift = shiftService.getShiftByDate(date);
         } catch (ShiftNotFoundException ignored) {
         }
-
         if (isNull(shift)) {
             shift = new Shift();
-            try {
-                var yesterdayShift = shiftService.getShiftByDate(date.minusDays(1));
-                shift.setCashOnMorning(yesterdayShift.getCashOnEvening());
-                shift.setCashKeyOnMorning(yesterdayShift.getCashKeyOnEvening());
-            } catch (ShiftNotFoundException ignored) {
-            }
         }
+        Shift yesterdayShift = null;
+        try {
+            yesterdayShift = shiftService.getShiftByDate(date.minusDays(1));
+        } catch (ShiftNotFoundException ignored) {
+        }
+        shift.setCashOnMorning(isNull(yesterdayShift) ? 0L : yesterdayShift.getCashOnEvening());
+        shift.setCashKeyOnMorning(isNull(yesterdayShift) ? 0L : yesterdayShift.getCashKeyOnEvening());
+
         return toShiftBO(shift);
     }
 
@@ -62,5 +63,19 @@ public class ShiftManagementService {
             updateShift.setTotalDinner(0L);
         }
         shiftService.updateShift(updateShift);
+    }
+
+    public void updateShiftsByDinnerSettings(DinnerSettingBO dinnerSettingBO) {
+        var shifts = shiftService.findAllByPeriod(parseLocalDate(dinnerSettingBO.getDateFrom()),
+                parseLocalDate(dinnerSettingBO.getDateTo()));
+        shifts.stream().forEach(shift -> {
+            var totalWorkTimes = shift.getShiftRows().stream()
+                    .map(ShiftRow::getTotalTime)
+                    .filter(Objects::nonNull)
+                    .toList();
+            var totalDinnerTime = calculateTotalDinnerPriceForShit(totalWorkTimes, dinnerSettingBO.getPrice());
+            shift.setTotalDinner(totalDinnerTime);
+            shiftService.updateShift(shift);
+        });
     }
 }

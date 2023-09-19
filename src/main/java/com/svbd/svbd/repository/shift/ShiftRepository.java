@@ -69,7 +69,8 @@ public class ShiftRepository {
 
     public List<Shift> findAllShiftsInPeriod(LocalDate dateFrom, LocalDate dateTo) {
         var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createQuery("FROM Shift s WHERE s.shiftDate >= :dateFrom AND s.shiftDate <= :dateTo");
+        var query = session.createQuery("FROM Shift s LEFT JOIN FETCH s.shiftRows sr WHERE s.shiftDate >= :dateFrom " +
+                "AND (:dateTo IS NULL OR s.shiftDate <= :dateTo)");
         query.setParameter("dateFrom", dateFrom);
         query.setParameter("dateTo", dateTo);
         var result = (List<Shift>) query.getResultList();

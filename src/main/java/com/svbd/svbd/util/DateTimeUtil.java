@@ -75,6 +75,6 @@ public final class DateTimeUtil {
     }
 
     public static boolean validateStartAndEndDate(LocalDate startDate, LocalDate endDate) {
-        return isNull(endDate) || startDate.isAfter(endDate);
+        return isNull(endDate) || startDate.isBefore(endDate);
     }
 }
