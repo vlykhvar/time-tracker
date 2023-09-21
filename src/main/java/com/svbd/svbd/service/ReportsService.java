@@ -173,12 +173,11 @@ public class ReportsService {
             if (isNull(row)) {
                 continue;
             }
-            for (int b = 0; b <= row.getPhysicalNumberOfCells(); b++) {
-                sheet.autoSizeColumn(b);
-                cell = row.getCell(b);
-                if (nonNull(cell)) {
-                    cell.setCellStyle(prepareCellStyle(workbook, WHITE, 13, false, THIN));
-                }
+            Iterator<Cell> headerIterator = row.cellIterator();
+            while (headerIterator.hasNext()) {
+                var cellInIteration = headerIterator.next();
+                sheet.autoSizeColumn(cellInIteration.getColumnIndex());
+                cellInIteration.setCellStyle(prepareCellStyle(workbook, WHITE, 13, false, THIN));
             }
         }
 
@@ -270,7 +269,7 @@ public class ReportsService {
         });
         var employeeNameById = new HashMap<Long, String>();
         siftRows.forEach(employShiftSalaryProjection -> employeeNameById.put(
-                        employShiftSalaryProjection.getEmployeeId(), employShiftSalaryProjection.getName()));
+                employShiftSalaryProjection.getEmployeeId(), employShiftSalaryProjection.getName()));
 
         int rowCount = 2;
         int cellCount = 0;
