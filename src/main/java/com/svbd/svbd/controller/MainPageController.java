@@ -1,8 +1,8 @@
 package com.svbd.svbd.controller;
 
 import com.svbd.svbd.controller.customfield.NumberField;
-import com.svbd.svbd.dto.shift.ShiftRequestBO;
 import com.svbd.svbd.dto.shift.ShiftBO;
+import com.svbd.svbd.dto.shift.ShiftRequestBO;
 import com.svbd.svbd.dto.shift.row.ShiftRowBO;
 import com.svbd.svbd.dto.shift.row.ShiftRowRequestBO;
 import com.svbd.svbd.exception.IncorrectPasswordException;
@@ -11,7 +11,6 @@ import com.svbd.svbd.service.ReportsService;
 import com.svbd.svbd.service.SettingsManagementService;
 import com.svbd.svbd.service.ShiftManagementService;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -19,7 +18,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -36,8 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.svbd.svbd.enums.Pages.REPORTS_PAGE;
-import static com.svbd.svbd.enums.Pages.SETTINGS_PAGE;
+import static com.svbd.svbd.enums.Pages.*;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
 import static com.svbd.svbd.util.ConstantUtil.TIME_REGEX;
 import static com.svbd.svbd.util.DateTimeUtil.prepareWorkTotalTime;
@@ -56,15 +53,6 @@ public class MainPageController extends Application implements Initializable {
 
     @FXML
     private MenuItem about;
-
-    @FXML
-    private AnchorPane anchorPane;
-
-    @FXML
-    private MenuItem menuEmployee;
-
-    @FXML
-    private MenuItem menuQuit;
 
     @FXML
     private DatePicker datePicker;
@@ -115,68 +103,78 @@ public class MainPageController extends Application implements Initializable {
     private TextArea comments;
 
     @FXML
-    private Button saveButton;
-
-    @FXML
-    private Button printOut;
-
-    @FXML
     private NumberField bonusTime;
 
     @FXML
-    void exit(ActionEvent event) {
-        Platform.exit();
-        System.exit(0);
-    }
-
-    @FXML
-    void openDialog(ActionEvent event) {
-
-    }
-
-    @FXML
-    void saveShift() throws Exception {
-        var shift = new ShiftRequestBO();
-        shift.setDate(datePicker.valueProperty().get());
-        shift.setTaxi(checkAndChangeStringToLong(taxi));
-        shift.setCashKeyOnEvening(checkAndChangeStringToLong(cashKeyOnEvening));
-        shift.setComments(comments.getText());
-        shift.setCashKeyTotal(checkAndChangeStringToLong(cashKeyTotal));
-        shift.setCashKeyOnMorning(checkAndChangeStringToLong(cashKeyOnMorning));
-        shift.setCashOnEvening(checkAndChangeStringToLong(cashOnEvening));
-        shift.setCashOnMorning(checkAndChangeStringToLong(cashOnMorning));
-        shift.setTotalCash(checkAndChangeStringToLong(totalCash));
-        shift.setBonusTime(checkAndChangeStringToLong(bonusTime));
-        var rows = new HashSet<ShiftRowRequestBO>();
-        for (ShiftRowBO row : shitEmployeeData.getItems()) {
-            if (nonNull(row.getStartShift()) && !row.getStartShift().isEmpty() ||
-                    nonNull(row.getShiftRowId())) {
-                var shiftRowRequestBO = toShiftRowRequestBO(row);
-                rows.add(shiftRowRequestBO);
-            }
+    void openAbout(ActionEvent event) {
+        try {
+            showStage(ABOUT);
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
         }
-        shift.getShiftRowBOs().addAll(rows);
-        shiftManagementService.creatOrUpdate(shift);
-        prepareData();
     }
 
     @FXML
-    void printOut() throws Exception {
-        saveShift();
-        var patch = reportsService.generateDailyReport(datePicker.getValue());
-        File excelFile = new File(patch);
-        getHostServices().showDocument(excelFile.toURI().toURL().toExternalForm());
+    void saveShift() {
+        try {
+            var shift = new ShiftRequestBO();
+            shift.setDate(datePicker.valueProperty().get());
+            shift.setTaxi(checkAndChangeStringToLong(taxi));
+            shift.setCashKeyOnEvening(checkAndChangeStringToLong(cashKeyOnEvening));
+            shift.setComments(comments.getText());
+            shift.setCashKeyTotal(checkAndChangeStringToLong(cashKeyTotal));
+            shift.setCashKeyOnMorning(checkAndChangeStringToLong(cashKeyOnMorning));
+            shift.setCashOnEvening(checkAndChangeStringToLong(cashOnEvening));
+            shift.setCashOnMorning(checkAndChangeStringToLong(cashOnMorning));
+            shift.setTotalCash(checkAndChangeStringToLong(totalCash));
+            shift.setBonusTime(checkAndChangeStringToLong(bonusTime));
+            var rows = new HashSet<ShiftRowRequestBO>();
+            for (ShiftRowBO row : shitEmployeeData.getItems()) {
+                if (nonNull(row.getStartShift()) && !row.getStartShift().isEmpty() ||
+                        nonNull(row.getShiftRowId())) {
+                    var shiftRowRequestBO = toShiftRowRequestBO(row);
+                    rows.add(shiftRowRequestBO);
+                }
+            }
+            shift.getShiftRowBOs().addAll(rows);
+            shiftManagementService.creatOrUpdate(shift);
+            prepareData();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
+        }
     }
 
     @FXML
-    void showReportScene() throws IOException {
-        showStage(REPORTS_PAGE);
+    void printOut() {
+        try {
+            saveShift();
+            var patch = reportsService.generateDailyReport(datePicker.getValue());
+            File excelFile = new File(patch);
+            getHostServices().showDocument(excelFile.toURI().toURL().toExternalForm());
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
+        }
     }
 
     @FXML
-    void showSettings() throws IOException {
-        showStage(SETTINGS_PAGE);
-    };
+    void showReportScene() {
+        try {
+            showStage(REPORTS_PAGE);
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
+        }
+    }
+
+    @FXML
+    void showSettings() {
+        try {
+            showStage(SETTINGS_PAGE);
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
+        }
+    }
+
+    ;
 
     @FXML
     void validateUser() throws IncorrectPasswordException {
@@ -210,26 +208,22 @@ public class MainPageController extends Application implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        datePicker.setConverter(new StringConverter<LocalDate>()
-        {
-            private DateTimeFormatter dateTimeFormatter= DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        datePicker.setConverter(new StringConverter<LocalDate>() {
+            private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             @Override
-            public String toString(LocalDate localDate)
-            {
-                if(localDate==null)
+            public String toString(LocalDate localDate) {
+                if (localDate == null)
                     return "";
                 return dateTimeFormatter.format(localDate);
             }
 
             @Override
-            public LocalDate fromString(String dateString)
-            {
-                if(dateString==null || dateString.trim().isEmpty())
-                {
+            public LocalDate fromString(String dateString) {
+                if (dateString == null || dateString.trim().isEmpty()) {
                     return null;
                 }
-                return LocalDate.parse(dateString,dateTimeFormatter);
+                return LocalDate.parse(dateString, dateTimeFormatter);
             }
         });
         initDateOnFirstOpen();
@@ -278,7 +272,8 @@ public class MainPageController extends Application implements Initializable {
         bonusTime.setText(String.valueOf(shift.getBonusTime()));
     }
 
-    private void prepareShiftDataToScene(ShiftBO shiftBO) {;
+    private void prepareShiftDataToScene(ShiftBO shiftBO) {
+        ;
         taxi.setText(adjustLong(shiftBO.getTaxi()));
         totalCash.setText(adjustLong(shiftBO.getTotalCash()));
         cashOnMorning.setText(adjustLong(shiftBO.getCashOnMorning()));
@@ -351,14 +346,14 @@ public class MainPageController extends Application implements Initializable {
     }
 
     private Integer prepareTotalTime(String startShift, String endShift) {
-            if (nonNull(startShift) && !startShift.isEmpty() && nonNull(endShift) && !endShift.isEmpty() &&
-                    startShift.matches(TIME_REGEX) && endShift.matches(TIME_REGEX)) {
-                var currentDate = datePicker.getValue();
-                var startShiftTime = LocalTime.parse(startShift);
-                var endShiftTime = LocalTime.parse(endShift);
-                return prepareWorkTotalTime(currentDate, startShiftTime, endShiftTime);
-            }
-            return 0;
+        if (nonNull(startShift) && !startShift.isEmpty() && nonNull(endShift) && !endShift.isEmpty() &&
+                startShift.matches(TIME_REGEX) && endShift.matches(TIME_REGEX)) {
+            var currentDate = datePicker.getValue();
+            var startShiftTime = LocalTime.parse(startShift);
+            var endShiftTime = LocalTime.parse(endShift);
+            return prepareWorkTotalTime(currentDate, startShiftTime, endShiftTime);
+        }
+        return 0;
     }
 
     private ShiftRowRequestBO toShiftRowRequestBO(ShiftRowBO shiftRowBO) throws Exception {

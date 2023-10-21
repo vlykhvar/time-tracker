@@ -13,7 +13,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.converter.LongStringConverter;
 
@@ -33,9 +32,6 @@ import static java.util.Objects.nonNull;
 public class EmployeeProfileController implements Initializable {
 
     private final EmployeeManagementService employeeManagementService = new EmployeeManagementService();
-
-    @FXML
-    private AnchorPane anchorPane;
 
     @FXML
     private TextField employeeIdField;

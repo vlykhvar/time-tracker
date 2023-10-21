@@ -30,7 +30,7 @@
                         </AnchorPane>
                     </content>
                 </Tab>
-                <Tab text="Dinner">
+                <Tab text="Харчування">
                     <content>
                         <AnchorPane fx:id="dinnerSaveButton" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
@@ -53,7 +53,7 @@
                         </AnchorPane>
                     </content>
                 </Tab>
-                <Tab text="Пароль">
+                <Tab text="Безпека">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="375.0" prefWidth="502.0">
                             <children>
@@ -65,13 +65,13 @@
                         </AnchorPane>
                     </content>
                 </Tab>
-                <Tab text="Компанія">
+                <Tab text="Департамент">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                <Button fx:id="saveCompanySettings" layoutX="302.0" layoutY="210.0" mnemonicParsing="false" onAction="#saveCompanySettings" prefHeight="26.0" prefWidth="123.0" text="Зберегти" />
-                                <Text layoutX="184.0" layoutY="122.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Назва компанії" wrappingWidth="94.13671875" />
-                                <TextField fx:id="companyNameField" layoutX="302.0" layoutY="105.0" />
+                                <Button fx:id="saveCompanySettings" layoutX="302.0" layoutY="209.0" mnemonicParsing="false" onAction="#saveCompanySettings" prefHeight="26.0" prefWidth="123.0" text="Зберегти" />
+                                <Text layoutX="154.0" layoutY="168.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Назва департаменту" wrappingWidth="118.13671875" />
+                                <TextField fx:id="companyNameField" layoutX="289.0" layoutY="151.0" />
                             </children>
                         </AnchorPane>
                     </content>

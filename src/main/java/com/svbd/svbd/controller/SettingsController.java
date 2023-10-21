@@ -99,9 +99,6 @@ public class SettingsController extends Application implements Initializable {
     private PasswordField doubleCheckField;
 
     @FXML
-    private Button saveCompanySettings;
-
-    @FXML
     private PasswordField newPasswordField;
 
     @FXML
@@ -109,12 +106,6 @@ public class SettingsController extends Application implements Initializable {
 
     @FXML
     private NumberField price;
-
-    @FXML
-    private Button saveDinnerSettings;
-
-    @FXML
-    private Button savePassword;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
