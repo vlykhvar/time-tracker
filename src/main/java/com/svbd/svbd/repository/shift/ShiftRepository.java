@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
+
 public class ShiftRepository {
 
     public Optional<Shift> getShiftByDate(LocalDate shiftDate) {
@@ -16,7 +18,7 @@ public class ShiftRepository {
         query.setParameter("shiftDate", shiftDate);
         var shift = (Shift) query.getSingleResultOrNull();
         session.close();
-        return Optional.ofNullable(shift);
+        return ofNullable(shift);
     }
 
     public Optional<Shift> findShiftByDateJoinShiftRows(LocalDate shiftDate) {
@@ -25,7 +27,7 @@ public class ShiftRepository {
         query.setParameter("shiftDate", shiftDate);
         var shift = (Shift) query.getSingleResultOrNull();
         session.close();
-        return Optional.ofNullable(shift);
+        return ofNullable(shift);
     }
 
     public LocalDate createShift(Shift shift) {

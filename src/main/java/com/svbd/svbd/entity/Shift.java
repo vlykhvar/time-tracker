@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.isNull;
+
 @Entity
 @Table(name = "shift")
 public class Shift {
@@ -42,6 +44,9 @@ public class Shift {
 
     @Column(name = "comments", length = 10000)
     private String comments;
+
+    @Column(name = "daily_revenue")
+    private Long dailyRevenue = 0L;
 
     @OneToMany(mappedBy = "shift", cascade = CascadeType.ALL)
     private List<ShiftRow> shiftRows = new ArrayList<>();
@@ -147,5 +152,13 @@ public class Shift {
 
     public void setTotalDinner(Long totalDinner) {
         this.totalDinner = totalDinner;
+    }
+
+    public Long getDailyRevenue() {
+        return isNull(dailyRevenue) ? 0 : dailyRevenue;
+    }
+
+    public void setDailyRevenue(Long dailyRevenue) {
+        this.dailyRevenue = dailyRevenue;
     }
 }

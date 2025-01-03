@@ -1,7 +1,5 @@
 package com.svbd.svbd.settings;
 
-import com.svbd.svbd.entity.Employee;
-import com.svbd.svbd.entity.Salary;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 

@@ -35,6 +35,7 @@ public class ReportsService {
     private static final String MAIN_REPORT_HEADER = "Звіт компанії %s з %s по %s";
     private static final String CASH_ON_MORNING_FIELD = "Каса на ранок";
     private static final String CASH_FIELD = "Каса прокату";
+    private static final String DAILY_REVENUE_FIELD = "Каса магазину";
     private static final String CASH_ON_EVENING_FIELD = "Каса на вечір";
     private static final String CASH_KEY_ON_MORNING_FIELD = "Каса ключі на ранок";
     private static final String CASH_KEY_FIELD = "Каса ключі";
@@ -70,6 +71,7 @@ public class ReportsService {
         var outputStream = new FileOutputStream(fileLocation);
         workbook.write(outputStream);
         workbook.close();
+        outputStream.close();
         return fileLocation;
     }
 
@@ -126,6 +128,11 @@ public class ReportsService {
         cell.setCellValue(CASH_KEY_ON_EVENING_FIELD);
         cell = row.createCell(1);
         cell.setCellValue(shift.getCashKeyOnEvening());
+        row = sheet.createRow(9);
+        cell = row.createCell(0);
+        cell.setCellValue(DAILY_REVENUE_FIELD);
+        cell = row.createCell(1);
+        cell.setCellValue(shift.getDailyRevenue());
         row = sheet.createRow(10);
         cell = row.createCell(0);
         cell.setCellValue(TAXI);
@@ -391,6 +398,7 @@ public class ReportsService {
         var totalDinner = sheet.createRow(sheet.getLastRowNum() + 1);
         var shiftCash = sheet.createRow(sheet.getLastRowNum() + 1);
         var keyCash = sheet.createRow(sheet.getLastRowNum() + 1);
+        var dailyRevenue = sheet.createRow(sheet.getLastRowNum() + 1);
         var totalCash = sheet.createRow(sheet.getLastRowNum() + 1);
         int cellPosition = 0;
         Cell cell = null;
@@ -406,6 +414,9 @@ public class ReportsService {
                 cells.add(cell);
                 cell = keyCash.createCell(cellPosition);
                 cell.setCellValue("Каса ключи");
+                cells.add(cell);
+                cell = dailyRevenue.createCell(cellPosition);
+                cell.setCellValue("Какса магазину");
                 cells.add(cell);
                 cell = totalCash.createCell(cellPosition);
                 cell.setCellValue("Загальний виторг");
@@ -430,8 +441,11 @@ public class ReportsService {
             cell = keyCash.createCell(cellPosition);
             cell.setCellValue(nonNull(currentShift) ? currentShift.getCashKeyTotal() : 0);
             cells.add(cell);
+            cell = dailyRevenue.createCell(cellPosition);
+            cell.setCellValue(nonNull(currentShift) && nonNull(currentShift.getDailyRevenue()) ? currentShift.getDailyRevenue() : 0);
+            cells.add(cell);
             cell = totalCash.createCell(cellPosition);
-            cell.setCellValue(nonNull(currentShift) ? currentShift.getCashKeyTotal() + currentShift.getTotalCash() : 0);
+            cell.setCellValue(nonNull(currentShift) ? currentShift.getCashKeyTotal() + currentShift.getTotalCash() + currentShift.getDailyRevenue() : 0);
             cells.add(cell);
             cell = totalDinner.createCell(cellPosition);
             cell.setCellValue(nonNull(currentShift) ? currentShift.getTotalDinner() : 0);
@@ -465,9 +479,14 @@ public class ReportsService {
                         .map(Shift::getCashKeyTotal)
                         .reduce(0L, Long::sum));
                 cells.add(cell);
+                cell = dailyRevenue.createCell(cellPosition);
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getDailyRevenue)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
                 cell = totalCash.createCell(cellPosition);
                 cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
+                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal() + shift.getDailyRevenue())
                         .reduce(0L, Long::sum));
                 cells.add(cell);
                 cell = totalDinner.createCell(cellPosition);
@@ -504,9 +523,14 @@ public class ReportsService {
                         .map(Shift::getCashKeyTotal)
                         .reduce(0L, Long::sum));
                 cells.add(cell);
+                cell = dailyRevenue.createCell(cellPosition);
+                cell.setCellValue(shiftInCurrentPeriods.stream()
+                        .map(Shift::getDailyRevenue)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
                 cell = totalCash.createCell(cellPosition);
                 cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
+                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal() + shift.getDailyRevenue())
                         .reduce(0L, Long::sum));
                 cells.add(cell);
                 cell = totalDinner.createCell(cellPosition);
@@ -534,9 +558,14 @@ public class ReportsService {
                         .map(Shift::getCashKeyTotal)
                         .reduce(0L, Long::sum));
                 cells.add(cell);
+                cell = dailyRevenue.createCell(cellPosition);
+                cell.setCellValue(shiftsInCurrentMonth.stream()
+                        .map(Shift::getDailyRevenue)
+                        .reduce(0L, Long::sum));
+                cells.add(cell);
                 cell = totalCash.createCell(cellPosition);
                 cell.setCellValue(shiftsInCurrentMonth.stream()
-                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal())
+                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal() + shift.getDailyRevenue())
                         .reduce(0L, Long::sum));
                 cells.add(cell);
                 cell = totalDinner.createCell(cellPosition);

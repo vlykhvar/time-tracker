@@ -24,6 +24,7 @@ public final class ShiftConverter {
         shiftBO.setTaxi(shift.getTaxi());
         shiftBO.setComments(shift.getComments());
         shiftBO.setBonusTime(shift.getBonusTime());
+        shiftBO.setDailyRevenue(shift.getDailyRevenue());
         shiftBO.getRows().addAll(toShiftRowBOs(shift.getShiftRows()));
         return shiftBO;
     }
@@ -40,6 +41,7 @@ public final class ShiftConverter {
         shift.setTaxi(shiftBO.getTaxi());
         shift.setComments(shiftBO.getComments());
         shift.setBonusTime(shiftBO.getBonusTime());
+        shift.setDailyRevenue(shiftBO.getDailyRevenue());
         return shift;
     }
 }
