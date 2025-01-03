@@ -18,6 +18,7 @@ public class ShiftRequestBO {
     private Long taxi;
     private Long totalDinner;
     private String comments;
+    private Long dailyRevenue;
     private final List<ShiftRowRequestBO> shiftRowBOs = new ArrayList<>();
 
     public LocalDate getDate() {
@@ -110,5 +111,13 @@ public class ShiftRequestBO {
 
     public List<ShiftRowRequestBO> getShiftRowBOs() {
         return shiftRowBOs;
+    }
+
+    public Long getDailyRevenue() {
+        return dailyRevenue;
+    }
+
+    public void setDailyRevenue(Long dailyRevenue) {
+        this.dailyRevenue = dailyRevenue;
     }
 }

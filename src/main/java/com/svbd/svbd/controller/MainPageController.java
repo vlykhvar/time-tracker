@@ -106,6 +106,9 @@ public class MainPageController extends Application implements Initializable {
     private NumberField bonusTime;
 
     @FXML
+    private NumberField dailyRevenue;
+
+    @FXML
     void openAbout(ActionEvent event) {
         try {
             showStage(ABOUT);
@@ -128,6 +131,7 @@ public class MainPageController extends Application implements Initializable {
             shift.setCashOnMorning(checkAndChangeStringToLong(cashOnMorning));
             shift.setTotalCash(checkAndChangeStringToLong(totalCash));
             shift.setBonusTime(checkAndChangeStringToLong(bonusTime));
+            shift.setDailyRevenue(checkAndChangeStringToLong(dailyRevenue));
             var rows = new HashSet<ShiftRowRequestBO>();
             for (ShiftRowBO row : shitEmployeeData.getItems()) {
                 if (nonNull(row.getStartShift()) && !row.getStartShift().isEmpty() ||
@@ -268,12 +272,10 @@ public class MainPageController extends Application implements Initializable {
         endEmployeeShift.setCellValueFactory(new PropertyValueFactory<>("endShift"));
         shiftRowId.setCellValueFactory(new PropertyValueFactory<>("shiftRowId"));
         totalWorkTime.setCellValueFactory(new PropertyValueFactory<>("totalWorkTime"));
-        shiftRowId.setCellValueFactory(new PropertyValueFactory<>("shiftRowId"));
         bonusTime.setText(String.valueOf(shift.getBonusTime()));
     }
 
     private void prepareShiftDataToScene(ShiftBO shiftBO) {
-        ;
         taxi.setText(adjustLong(shiftBO.getTaxi()));
         totalCash.setText(adjustLong(shiftBO.getTotalCash()));
         cashOnMorning.setText(adjustLong(shiftBO.getCashOnMorning()));
@@ -283,6 +285,7 @@ public class MainPageController extends Application implements Initializable {
         cashKeyOnMorning.setText(adjustLong(shiftBO.getCashKeyOnMorning()));
         comments.setText(shiftBO.getComments());
         bonusTime.setText(adjustLong(shiftBO.getBonusTime()));
+        dailyRevenue.setText(adjustLong(shiftBO.getDailyRevenue()));
     }
 
     private void prepareShitRowTableWithoutData() {

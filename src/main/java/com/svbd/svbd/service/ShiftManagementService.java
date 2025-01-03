@@ -68,7 +68,7 @@ public class ShiftManagementService {
     public void updateShiftsByDinnerSettings(DinnerSettingBO dinnerSettingBO) {
         var shifts = shiftService.findAllByPeriod(parseLocalDate(dinnerSettingBO.getDateFrom()),
                 parseLocalDate(dinnerSettingBO.getDateTo()));
-        shifts.stream().forEach(shift -> {
+        shifts.forEach(shift -> {
             var totalWorkTimes = shift.getShiftRows().stream()
                     .map(ShiftRow::getTotalTime)
                     .filter(Objects::nonNull)
