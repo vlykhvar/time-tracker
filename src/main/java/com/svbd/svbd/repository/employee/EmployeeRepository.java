@@ -14,19 +14,18 @@ import java.util.stream.Collectors;
 
 public class EmployeeRepository {
 
-
     public Long createEmployee(Employee employee) throws HibernateException {
         Long id;
         var session = HibernateModule.getSessionFactory().openSession();
         var transaction = session.beginTransaction();
         try {
-            id = (Long) session.save(employee);
+            id = session.merge(employee).getEmployeeId();
             transaction.commit();
-            session.close();
         } catch (HibernateException e) {
             transaction.rollback();
-            session.close();
             throw new HibernateException(e);
+        } finally {
+            session.close();
         }
         return id;
     }
@@ -35,13 +34,13 @@ public class EmployeeRepository {
         var session = HibernateModule.getSessionFactory().openSession();
         var transaction = session.beginTransaction();
         try {
-            session.update(employee);
+            session.merge(employee);
             transaction.commit();
-            session.close();
         } catch (HibernateException e) {
             transaction.rollback();
-            session.close();
             throw new HibernateException(e);
+        } finally {
+            session.close();
         }
     }
 
@@ -53,7 +52,7 @@ public class EmployeeRepository {
             query.setParameter("employeeId", employeeId);
             var employee = (Employee) query.uniqueResult();
             employee.setRemovedAt(LocalDate.now());
-            session.save(employee);
+            session.persist(employee);
             transaction.commit();
             session.close();
         } catch (HibernateException e) {
@@ -61,11 +60,6 @@ public class EmployeeRepository {
             session.close();
             throw new HibernateException(e);
         }
-    }
-
-    public List<Employee> findAll() throws HibernateException {
-        var session = HibernateModule.getSessionFactory().openSession();
-        return session.createQuery("SELECT a FROM Employee a", Employee.class).getResultList();
     }
 
     public List<Employee> findAllRemovedAtIsNull() {
@@ -83,7 +77,7 @@ public class EmployeeRepository {
                 "SELECT new com.svbd.svbd.repository.projection.EmployeeShortProjection(e.id, e.name) " +
                         "FROM Employee e WHERE e.removedAt IS NULL",
                 EmployeeShortProjection.class);
-        var result =  employeeTypedQuery.getResultList();
+        var result = employeeTypedQuery.getResultList();
         session.close();
         return result;
     }
