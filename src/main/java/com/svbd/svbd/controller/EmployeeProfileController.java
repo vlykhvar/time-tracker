@@ -18,6 +18,8 @@ import javafx.util.converter.LongStringConverter;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.ResourceBundle;
@@ -87,7 +89,8 @@ public class EmployeeProfileController implements Initializable {
 
     private void prepareTable(Collection<SalaryBO> salaries) {
         var sortedSalaries = salaries.stream()
-                .sorted(Comparator.comparing(SalaryBO::getStartDate))
+                .sorted(Comparator.comparing(salary ->
+                        LocalDate.parse(salary.getStartDate(), DateTimeFormatter.ofPattern("dd.MM.yyyy"))))
                 .toList();
         salaryTable.getItems().addAll(sortedSalaries);
         salaryTable.getItems().add(new SalaryBO());

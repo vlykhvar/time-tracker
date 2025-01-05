@@ -17,10 +17,6 @@ public class EmployeeService {
         repository.removeById(employeeId);
     }
 
-    public List<Employee> getAllEmployee() {
-        return repository.findAll();
-    }
-
     public List<Employee> findAllActiveEmployee() {
         return repository.findAllRemovedAtIsNull();
     }

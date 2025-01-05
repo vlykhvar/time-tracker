@@ -69,9 +69,17 @@ public class ReportsService {
         var path = currDir.getAbsolutePath();
         var fileLocation = path.substring(0, path.length() - 1) + "temsp.xls";
         var outputStream = new FileOutputStream(fileLocation);
-        workbook.write(outputStream);
-        workbook.close();
-        outputStream.close();
+        try {
+            workbook.write(outputStream);
+            workbook.close();
+            outputStream.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            workbook.close();
+            outputStream.close();
+        }
+
         return fileLocation;
     }
 
@@ -175,6 +183,13 @@ public class ReportsService {
         sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum() + 3, 0, 6));
 
 
+
+
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 6));
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 4, 5));
+        sheet.addMergedRegion(new CellRangeAddress(1, 2, 0, 1));
+        sheet.addMergedRegion(new CellRangeAddress(1, 2, 2, 2));
+
         for (int i = 0; i <= sheet.getLastRowNum(); i++) {
             row = sheet.getRow(i);
             if (isNull(row)) {
@@ -188,18 +203,17 @@ public class ReportsService {
             }
         }
 
-
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 6));
-        sheet.addMergedRegion(new CellRangeAddress(1, 1, 4, 5));
-        sheet.addMergedRegion(new CellRangeAddress(1, 2, 0, 1));
-        sheet.addMergedRegion(new CellRangeAddress(1, 2, 2, 2));
-
         var currDir = new File(".");
         var path = currDir.getAbsolutePath();
         var fileLocation = path.substring(0, path.length() - 1) + "daily.xls";
         var outputStream = new FileOutputStream(fileLocation);
-        workbook.write(outputStream);
-        workbook.close();
+        try {
+            workbook.write(outputStream);
+        } catch (Exception e) {
+            workbook.close();
+            outputStream.close();
+        }
+
         return fileLocation;
     }
 

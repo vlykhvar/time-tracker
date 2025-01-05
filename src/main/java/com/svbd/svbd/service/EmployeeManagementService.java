@@ -30,7 +30,7 @@ public class EmployeeManagementService {
     }
 
     public void createEmployee(Employee employee) {
-        var salary = employee.getSalaries().stream().findFirst().orElseThrow(() -> new EmptyStackException());
+        var salary = employee.getSalaries().stream().findFirst().orElseThrow(EmptyStackException::new);
         employee.getSalaries().clear();
         var employeeId = employeeService.createEmployee(employee);
         salary.setEmployee(new Employee(employeeId));
@@ -46,7 +46,7 @@ public class EmployeeManagementService {
     }
 
     public EmployeeBO getEmployee(Long employeeId) throws Exception {
-        return toEmployeeBO(repository.findById(employeeId).orElseThrow(() -> new Exception()));
+        return toEmployeeBO(repository.findById(employeeId).orElseThrow(Exception::new));
     }
 
     public void updateEmployee(EmployeeBO employeeBO)

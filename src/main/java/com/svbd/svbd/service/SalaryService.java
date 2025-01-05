@@ -24,8 +24,4 @@ public class SalaryService {
         }
         repository.removeSalariesByIds(salaryIds);
     }
-
-    public List<SalaryEmployeeProjection> getActualSalaryForEmployees(Collection<Long> employeeId) {
-        return repository.findAllByEmployeeIdsAndStartDateEndDateBetweenDate(employeeId, LocalDate.now());
-    }
 }
