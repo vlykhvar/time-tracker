@@ -10,7 +10,8 @@ import com.svbd.svbd.service.EmployeeManagementService;
 import com.svbd.svbd.service.ReportsService;
 import com.svbd.svbd.service.SettingsManagementService;
 import com.svbd.svbd.service.ShiftManagementService;
-import javafx.application.Application;
+import com.svbd.svbd.util.StageManager;
+import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,10 +19,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import java.io.File;
@@ -34,20 +35,38 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 import static com.svbd.svbd.enums.Pages.*;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
 import static com.svbd.svbd.util.ConstantUtil.TIME_REGEX;
 import static com.svbd.svbd.util.DateTimeUtil.prepareWorkTotalTime;
-import static com.svbd.svbd.util.StageUtil.showStage;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-public class MainPageController extends Application implements Initializable {
+@Component
+public class MainPageController implements Initializable {
 
-    private final ShiftManagementService shiftManagementService = new ShiftManagementService();
-    private final EmployeeManagementService employeeManagementService = new EmployeeManagementService();
-    private final SettingsManagementService settingsManagementService = new SettingsManagementService();
-    private final ReportsService reportsService = new ReportsService();
+    private final ShiftManagementService shiftManagementService;
+    private final EmployeeManagementService employeeManagementService;
+    private final SettingsManagementService settingsManagementService;
+    private final ReportsService reportsService;
+    private final StageManager stageManager;
+    private final HostServices hostServices;
+
+    public MainPageController(ShiftManagementService shiftManagementService,
+                              EmployeeManagementService employeeManagementService,
+                              SettingsManagementService settingsManagementService,
+                              ReportsService reportsService,
+                              StageManager stageManager,
+                              HostServices hostServices) {
+        this.shiftManagementService = shiftManagementService;
+        this.employeeManagementService = employeeManagementService;
+        this.settingsManagementService = settingsManagementService;
+        this.reportsService = reportsService;
+        this.stageManager = stageManager;
+        this.hostServices = hostServices;
+    }
 
     public Menu management;
 
@@ -58,7 +77,10 @@ public class MainPageController extends Application implements Initializable {
     private DatePicker datePicker;
 
     @FXML
-    private TableView<ShiftRowBO> shitEmployeeData;
+    private AnchorPane anchorPane; // Убедитесь, что у корневого AnchorPane есть этот fx:id
+
+    @FXML
+    private TableView<ShiftRowBO> shiftEmployeeData;
 
     @FXML
     private TableColumn<ShiftRowBO, Long> shiftRowId;
@@ -111,7 +133,8 @@ public class MainPageController extends Application implements Initializable {
     @FXML
     void openAbout(ActionEvent event) {
         try {
-            showStage(ABOUT);
+            // Используем новый StageManager для открытия окна
+            stageManager.showModalStage(ABOUT, anchorPane.getScene(), "Про програму");
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
         }
@@ -133,7 +156,7 @@ public class MainPageController extends Application implements Initializable {
             shift.setBonusTime(checkAndChangeStringToLong(bonusTime));
             shift.setDailyRevenue(checkAndChangeStringToLong(dailyRevenue));
             var rows = new HashSet<ShiftRowRequestBO>();
-            for (ShiftRowBO row : shitEmployeeData.getItems()) {
+            for (ShiftRowBO row : shiftEmployeeData.getItems()) {
                 if (nonNull(row.getStartShift()) && !row.getStartShift().isEmpty() ||
                         nonNull(row.getShiftRowId())) {
                     var shiftRowRequestBO = toShiftRowRequestBO(row);
@@ -154,31 +177,30 @@ public class MainPageController extends Application implements Initializable {
             saveShift();
             var patch = reportsService.generateDailyReport(datePicker.getValue());
             File excelFile = new File(patch);
-            getHostServices().showDocument(excelFile.toURI().toURL().toExternalForm());
+            hostServices.showDocument(excelFile.toURI().toURL().toExternalForm());
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
         }
     }
 
     @FXML
-    void showReportScene() {
+    void showReportScene(ActionEvent event) {
         try {
-            showStage(REPORTS_PAGE);
+            stageManager.showModalStage(REPORTS_PAGE, anchorPane.getScene(), "Звіти");
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
         }
     }
 
     @FXML
-    void showSettings() {
+    void showSettings(ActionEvent event) {
         try {
-            showStage(SETTINGS_PAGE);
+            stageManager.showModalStage(SETTINGS_PAGE, anchorPane.getScene(), "Налаштування");
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
         }
     }
 
-    ;
 
     @FXML
     void validateUser() throws IncorrectPasswordException {
@@ -262,9 +284,9 @@ public class MainPageController extends Application implements Initializable {
 
         prepareShiftDataToScene(shift);
         if (shift.getRows().isEmpty()) {
-            prepareShitRowTableWithoutData();
+            prepareShiftRowTableWithoutData();
         } else {
-            prepareShitRowTableWithData(shift.getRows());
+            prepareShiftRowTableWithData(shift.getRows());
         }
         employeeName.setCellValueFactory(new PropertyValueFactory<>("employeeName"));
         employeeId.setCellValueFactory(new PropertyValueFactory<>("employeeId"));
@@ -288,16 +310,16 @@ public class MainPageController extends Application implements Initializable {
         dailyRevenue.setText(adjustLong(shiftBO.getDailyRevenue()));
     }
 
-    private void prepareShitRowTableWithoutData() {
+    private void prepareShiftRowTableWithoutData() {
         var shifts = employeeManagementService.getAllShortEmployeesData().stream()
                 .map(ShiftRowBO::new)
                 .collect(Collectors.toSet());
-        shitEmployeeData.getItems().clear();
-        shitEmployeeData.getItems().addAll(shifts.stream().sorted(Comparator.comparing(ShiftRowBO::getEmployeeName)).toList());
+        shiftEmployeeData.getItems().clear();
+        shiftEmployeeData.getItems().addAll(shifts.stream().sorted(Comparator.comparing(ShiftRowBO::getEmployeeName)).toList());
 
     }
 
-    private void prepareShitRowTableWithData(Collection<ShiftRowBO> rowBOs) {
+    private void prepareShiftRowTableWithData(Collection<ShiftRowBO> rowBOs) {
         var excludeIds = rowBOs.stream().map(ShiftRowBO::getEmployeeId).collect(Collectors.toSet());
         var employees = employeeManagementService.getAllShortEmployeesDataExcludeIds(excludeIds);
         var emptyRowsWithEmployee = employees.stream()
@@ -307,8 +329,8 @@ public class MainPageController extends Application implements Initializable {
         rowBOs = rowBOs.stream()
                 .sorted(Comparator.comparing(ShiftRowBO::getEmployeeName))
                 .toList();
-        shitEmployeeData.getItems().clear();
-        shitEmployeeData.getItems().addAll(rowBOs);
+        shiftEmployeeData.getItems().clear();
+        shiftEmployeeData.getItems().addAll(rowBOs);
     }
 
     private void initDateOnFirstOpen() {
@@ -391,10 +413,5 @@ public class MainPageController extends Application implements Initializable {
             throw new Exception();
         }
         return shiftRowRequest;
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-
     }
 }

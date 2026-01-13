@@ -1,6 +1,5 @@
 package com.svbd.svbd.controller;
 
-import com.svbd.svbd.Application;
 import com.svbd.svbd.controller.customfield.NumberField;
 import com.svbd.svbd.dto.employee.EmployeeWithLastSalaryBO;
 import com.svbd.svbd.dto.settings.DinnerSettingBO;
@@ -10,9 +9,8 @@ import com.svbd.svbd.exception.OverlapingDateException;
 import com.svbd.svbd.service.EmployeeManagementService;
 import com.svbd.svbd.service.SettingsManagementService;
 import com.svbd.svbd.service.ShiftManagementService;
-import com.svbd.svbd.util.DataHolder;
 import com.svbd.svbd.util.DateTimeUtil;
-import com.svbd.svbd.util.StageUtil;
+import com.svbd.svbd.util.StageManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -23,6 +21,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.LongStringConverter;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
@@ -33,17 +32,31 @@ import java.util.ResourceBundle;
 import static com.svbd.svbd.enums.Exceptions.NUMBER_VALUE_EXCEPTION;
 import static com.svbd.svbd.enums.Pages.EMPLOYEE_PROFILE;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
-import static com.svbd.svbd.util.AlertUtil.showAlertWithButtonYesAndNo;
+import static com.svbd.svbd.util.AlertUtil.showConfirmationDialog;
 import static com.svbd.svbd.util.ConstantUtil.EMPTY;
 import static com.svbd.svbd.util.DateTimeUtil.parseLocalDate;
 import static java.util.Objects.isNull;
 
-public class SettingsController extends Application implements Initializable {
+@Component
+public class SettingsController implements Initializable {
 
-    private final EmployeeManagementService employeeManagementService = new EmployeeManagementService();
-    private final SettingsManagementService settingsManagementService = new SettingsManagementService();
-    private final ShiftManagementService shiftManagementService = new ShiftManagementService();
+    private final EmployeeManagementService employeeManagementService;
+    private final SettingsManagementService settingsManagementService;
+    private final ShiftManagementService shiftManagementService;
+    private final StageManager stageManager;
 
+    public SettingsController(EmployeeManagementService employeeManagementService,
+                              SettingsManagementService settingsManagementService,
+                              ShiftManagementService shiftManagementService,
+                              StageManager stageManager) {
+        this.employeeManagementService = employeeManagementService;
+        this.settingsManagementService = settingsManagementService;
+        this.shiftManagementService = shiftManagementService;
+        this.stageManager = stageManager;
+    }
+    @FXML
+    private TabPane tabPane;
+    // Pane для получения текущей сцены при открытии модальных окон
     @FXML
     private Button buttonId;
 
@@ -109,7 +122,7 @@ public class SettingsController extends Application implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        prepareEmployeeColumn();
+        setupEmployeeTable();
         editDinnerSettingsTable();
         prepareDinnerColumn();
         prepareCompanySettings();
@@ -133,7 +146,7 @@ public class SettingsController extends Application implements Initializable {
         fullName.setText(EMPTY);
         phoneNumber.setText(EMPTY);
         perHour.setText(EMPTY);
-        prepareEmployeeColumn();
+        refreshEmployeeTable();
     }
 
     @FXML
@@ -267,8 +280,7 @@ public class SettingsController extends Application implements Initializable {
                         } else {
                             btn.setOnAction(event -> {
                                 var dinnerSetting = getTableView().getItems().get(getIndex());
-                                var result = showAlertWithButtonYesAndNo(Alert.AlertType.WARNING,
-                                        "Видалення",
+                                var result = showConfirmationDialog("Видалення",
                                         String.format("Ви бажаєте видалити?"));
                                 if (result) {
                                     settingsManagementService.removeDinnerSettingById(dinnerSetting.getId());
@@ -298,7 +310,7 @@ public class SettingsController extends Application implements Initializable {
         return characters;
     }
 
-    private void prepareEmployeeColumn() {
+    private void setupEmployeeTable() {
         fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         employeeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         phoneNumberColumn.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
@@ -320,12 +332,11 @@ public class SettingsController extends Application implements Initializable {
                         } else {
                             btn.setOnAction(event -> {
                                 var employee = getTableView().getItems().get(getIndex());
-                                var result = showAlertWithButtonYesAndNo(Alert.AlertType.WARNING,
-                                        "Видалення співробітника",
+                                var result = showConfirmationDialog("Видалення співробітника",
                                         String.format("Ви бажаєте видалити співробітника %s?", employee.getName()));
                                 if (result) {
                                     employeeManagementService.removeById(employee.getId());
-                                    initialize(null, null);
+                                    refreshEmployeeTable();
                                 }
                             });
                             setGraphic(btn);
@@ -336,25 +347,40 @@ public class SettingsController extends Application implements Initializable {
             }
         };
         remove.setCellFactory(removeFactory);
+        refreshEmployeeTable();
+    }
+
+    private void refreshEmployeeTable() {
         employeeTable.setItems(getEmployees());
     }
 
     private void setEmployeeColumnListener() {
         employeeTable.setOnMouseClicked(click -> {
             if (click.getClickCount() == 2) {
-                @SuppressWarnings("rawtypes")
-                TablePosition pos = employeeTable.getSelectionModel().getSelectedCells().get(0);
-                int row = pos.getRow();
-                var employee = employeeTable.getItems().get(row);
-                try {
-                    DataHolder.getInstance().setData(employee.getId());
-                    StageUtil.showStage(EMPLOYEE_PROFILE);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                EmployeeWithLastSalaryBO selectedEmployee = employeeTable.getSelectionModel().getSelectedItem();
+                if (selectedEmployee != null) {
+                    openEmployeeProfile(selectedEmployee.getId());
                 }
-
             }
         });
+    }
+
+    private void openEmployeeProfile(Long employeeId) {
+        try {
+            // 1. Загружаем FXML и получаем результат (сцену и контроллер)
+            StageManager.FxmlLoadResult<EmployeeProfileController> result = stageManager.load(EMPLOYEE_PROFILE);
+
+            // 2. Получаем контроллер и передаем ему данные
+            EmployeeProfileController controller = result.controller();
+            controller.loadEmployeeData(employeeId);
+
+            // 3. Создаем и показываем окно
+            var stage = stageManager.createModalStage(tabPane.getScene(), "Профіль співробітника");
+            stage.setScene(result.scene());
+            stage.showAndWait();
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Помилка", "Не вдалося відкрити профіль співробітника.");
+        }
     }
 
     private void prepareCompanySettings() {

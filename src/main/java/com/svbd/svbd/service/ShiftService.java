@@ -3,10 +3,12 @@ package com.svbd.svbd.service;
 import com.svbd.svbd.entity.Shift;
 import com.svbd.svbd.exception.ShiftNotFoundException;
 import com.svbd.svbd.repository.shift.ShiftRepository;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Service
 public class ShiftService {
 
     private ShiftRepository repository = new ShiftRepository();

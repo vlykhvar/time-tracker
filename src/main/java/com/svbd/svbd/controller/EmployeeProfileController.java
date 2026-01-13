@@ -5,9 +5,7 @@ import com.svbd.svbd.dto.employee.EmployeeBO;
 import com.svbd.svbd.dto.salary.SalaryBO;
 import com.svbd.svbd.enums.Exceptions;
 import com.svbd.svbd.exception.OverlapingDateException;
-import com.svbd.svbd.exception.StartDateAfterEndDateException;
 import com.svbd.svbd.service.EmployeeManagementService;
-import com.svbd.svbd.util.DataHolder;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -15,6 +13,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import javafx.util.converter.LongStringConverter;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,13 +26,16 @@ import java.util.stream.Collectors;
 
 import static com.svbd.svbd.enums.Exceptions.START_DATE_AFTER_EXCEPTION;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
-import static com.svbd.svbd.util.DateTimeUtil.parseLocalDate;
-import static com.svbd.svbd.util.StageUtil.closeCurrentStage;
 import static java.util.Objects.nonNull;
 
+@Component
 public class EmployeeProfileController implements Initializable {
 
-    private final EmployeeManagementService employeeManagementService = new EmployeeManagementService();
+    private final EmployeeManagementService employeeManagementService;
+
+    public EmployeeProfileController(EmployeeManagementService employeeManagementService) {
+        this.employeeManagementService = employeeManagementService;
+    }
 
     @FXML
     private TextField employeeIdField;
@@ -64,43 +66,57 @@ public class EmployeeProfileController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        var employeeId = (Long) DataHolder.getInstance().getData();
+        // Настройка колонок и обработчиков редактирования
+        // не зависит от конкретного сотрудника и выполняется один раз
+        setupTableColumns();
+        setupTableEditing();
+    }
+
+
+    public void loadEmployeeData(Long employeeId) {
         try {
             var employee = employeeManagementService.getEmployee(employeeId);
             employeeIdField.setText(employee.getId().toString());
             phoneNumber.setText(employee.getPhoneNumber());
             name.setText(employee.getName());
-            prepareTable(employee.getSalaries());
-            editTable();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "CRITICAL ERROR", "ERROR");
+            populateTable(employee.getSalaries());
+        } catch (Exception e) { // Ловим более конкретные исключения
+            showAlert(Alert.AlertType.ERROR, "Помилка завантаження", "Не вдалося завантажити дані профілю.");
         }
     }
 
     @FXML
     void saveEmployee() throws IOException {
         try {
-            employeeManagementService.updateEmployee(prepareEmployeeBO());
-            closeCurrentStage((Stage) save.getScene().getWindow());
+            EmployeeBO employeeToSave = prepareEmployeeBO();
+            employeeManagementService.updateEmployee(employeeToSave);
+
+            // Правильный способ закрыть окно изнутри контроллера
+            Stage stage = (Stage) save.getScene().getWindow();
+            stage.close();
         } catch (OverlapingDateException e) {
             showAlert(Exceptions.DATE_OVERLAPPING_EXCEPTION);
         }
     }
 
-    private void prepareTable(Collection<SalaryBO> salaries) {
+    private void populateTable(Collection<SalaryBO> salaries) {
         var sortedSalaries = salaries.stream()
                 .sorted(Comparator.comparing(salary ->
                         LocalDate.parse(salary.getStartDate(), DateTimeFormatter.ofPattern("dd.MM.yyyy"))))
                 .toList();
+        salaryTable.getItems().clear();
         salaryTable.getItems().addAll(sortedSalaries);
         salaryTable.getItems().add(new SalaryBO());
+    }
+
+    private void setupTableColumns() {
         id.setCellValueFactory(new PropertyValueFactory<>("salaryId"));
         perHour.setCellValueFactory(new PropertyValueFactory<>("anHour"));
         startDate.setCellValueFactory(new PropertyValueFactory<>("startDate"));
         endDate.setCellValueFactory(new PropertyValueFactory<>("endDate"));
     }
 
-    private void editTable() {
+    private void setupTableEditing() {
         perHour.setCellFactory(TextFieldTableCell.forTableColumn(new LongStringConverter()));
         perHour.setOnEditCommit(event -> {
                     var salary = (SalaryBO) event.getTableView().getItems().get(
@@ -112,8 +128,9 @@ public class EmployeeProfileController implements Initializable {
         startDate.setCellFactory(TextFieldTableCell.forTableColumn());
         startDate.setOnEditCommit(event -> {
                     var salary = (SalaryBO) event.getTableView().getItems().get(
-                            event.getTablePosition().getRow());try {
-                      parseLocalDate(event.getNewValue());
+                            event.getTablePosition().getRow());
+                    try {
+                        LocalDate.parse(event.getNewValue(), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
                         salary.setStartDate(event.getNewValue());
                     } catch (Exception e) {
                         showAlert(Alert.AlertType.ERROR, "Невірний формат дати",
@@ -126,7 +143,7 @@ public class EmployeeProfileController implements Initializable {
                     var salary = (SalaryBO) event.getTableView().getItems().get(
                             event.getTablePosition().getRow());
                     try {
-                        parseLocalDate(event.getNewValue());
+                        LocalDate.parse(event.getNewValue(), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
                         salary.setEndDate(event.getNewValue());
                     } catch (Exception e) {
                         showAlert(Alert.AlertType.ERROR, "Невірний формат дати",
@@ -153,11 +170,13 @@ public class EmployeeProfileController implements Initializable {
 
     private void validateStartAndEndDate(Collection<SalaryBO> salaryBOs) {
         for (var salary : salaryBOs) {
-            var startDate = parseLocalDate(salary.getStartDate());
-            var endDate = parseLocalDate(salary.getEndDate());
-            if (nonNull(endDate) && startDate.isAfter(endDate)) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            LocalDate start = LocalDate.parse(salary.getStartDate(), formatter);
+            LocalDate end = nonNull(salary.getEndDate()) ? LocalDate.parse(salary.getEndDate(), formatter) : null;
+
+            if (nonNull(end) && start.isAfter(end)) {
                 showAlert(START_DATE_AFTER_EXCEPTION);
-                throw new StartDateAfterEndDateException();
+                throw new IllegalArgumentException("Start date cannot be after end date.");
             }
         }
     }

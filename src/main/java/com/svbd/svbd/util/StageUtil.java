@@ -4,7 +4,10 @@ import com.svbd.svbd.enums.Pages;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -42,8 +45,9 @@ public final class StageUtil {
         nextStage.show();
     }
 
-    public static void creatMainStage(Stage stage) throws IOException {
+    public static void creatMainStage(Stage stage, ConfigurableApplicationContext context) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(StageUtil.class.getResource(MAIN_PAGE.getPagePath()));
+        fxmlLoader.setControllerFactory(context::getBean);
         prepareIcon(stage);
         Scene scene = new Scene(fxmlLoader.load());
         scene.getStylesheets().add(Objects.requireNonNull(StageUtil.class.getResource("/application.css")).toExternalForm());

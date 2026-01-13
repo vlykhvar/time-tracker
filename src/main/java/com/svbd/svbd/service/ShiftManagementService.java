@@ -8,6 +8,7 @@ import com.svbd.svbd.entity.ShiftRow;
 import com.svbd.svbd.exception.DinnerNotFoundException;
 import com.svbd.svbd.exception.ShiftNotFoundException;
 import jakarta.persistence.Transient;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -19,10 +20,16 @@ import static com.svbd.svbd.util.DateTimeUtil.parseLocalDate;
 import static com.svbd.svbd.util.MathUtil.calculateTotalDinnerPriceForShit;
 import static java.util.Objects.isNull;
 
+@Service
 public class ShiftManagementService {
 
-    private final ShiftService shiftService = new ShiftService();
-    private final SettingsManagementService settingsManagementService = new SettingsManagementService();
+    private final ShiftService shiftService;
+    private final SettingsManagementService settingsManagementService;
+
+    public ShiftManagementService(ShiftService shiftService, SettingsManagementService settingsManagementService) {
+        this.shiftService = shiftService;
+        this.settingsManagementService = settingsManagementService;
+    }
 
     public ShiftBO getShiftByDate(LocalDate date) {
         Shift shift = null;

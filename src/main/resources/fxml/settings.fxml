@@ -5,15 +5,15 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="576.0" prefWidth="728.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.SettingsController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="576.0" prefWidth="728.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.SettingsController">
     <children>
-        <TabPane prefHeight="576.0" prefWidth="728.0" tabClosingPolicy="UNAVAILABLE">
+        <TabPane fx:id="tabPane" prefHeight="576.0" prefWidth="728.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <tabs>
                 <Tab text="Працівники">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="547.0" prefWidth="715.0">
+                        <GridPane hgap="10" vgap="10">
                             <children>
-                                <TableView fx:id="employeeTable" layoutX="225.0" layoutY="4.0" prefHeight="491.0" prefWidth="499.0">
+                                <TableView fx:id="employeeTable" prefHeight="491.0" prefWidth="499.0" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.rowSpan="2">
                                     <columns>
                                         <TableColumn fx:id="employeeIdColumn" editable="false" prefWidth="75.0" text="ID" visible="false" />
                                         <TableColumn fx:id="fullNameColumn" editable="false" prefWidth="191.20001220703125" text="ПІБ" />
@@ -21,20 +21,32 @@
                                         <TableColumn id="remove" fx:id="remove" editable="false" minWidth="0.0" prefWidth="152.800048828125" text="Видалити" />
                                     </columns>
                                 </TableView>
-                                <Button id="newEmploeeButton" fx:id="buttonId" layoutX="51.0" layoutY="214.0" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="105.0" text="Створити" AnchorPane.leftAnchor="51.0" AnchorPane.topAnchor="214.0" />
-                                <TextField fx:id="fullName" alignment="CENTER" layoutX="14.0" layoutY="102.0" prefHeight="26.0" prefWidth="180.0" promptText="ПІБ" />
-                                <NumberField fx:id="phoneNumber" alignment="CENTER" layoutX="14.0" layoutY="140.0" prefHeight="26.0" prefWidth="180.0" promptText="Номер телефону" />
-                                <NumberField fx:id="perHour" alignment="CENTER" layoutX="14.0" layoutY="178.0" prefHeight="26.0" prefWidth="180.0" promptText="зп за годину" />
-                                <Text layoutX="22.0" layoutY="89.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Додати нового співробітника" wrappingWidth="164.0" />
+                                <VBox prefHeight="200.0" prefWidth="200.0" spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <children>
+                                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Додати нового співробітника" wrappingWidth="164.0" />
+                                        <TextField fx:id="fullName" alignment="CENTER" prefHeight="26.0" prefWidth="180.0" promptText="ПІБ" />
+                                        <NumberField fx:id="phoneNumber" alignment="CENTER" prefHeight="26.0" prefWidth="180.0" promptText="Номер телефону" />
+                                        <NumberField fx:id="perHour" alignment="CENTER" prefHeight="26.0" prefWidth="180.0" promptText="зп за годину" />
+                                        <Button id="newEmploeeButton" fx:id="createEmployeeButton" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="105.0" text="Створити" />
+                                    </children>
+                                </VBox>
                             </children>
-                        </AnchorPane>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                        </GridPane>
                     </content>
                 </Tab>
                 <Tab text="Харчування">
                     <content>
                         <AnchorPane fx:id="dinnerSaveButton" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                <Button fx:id="saveDinnerSettings" layoutX="129.0" layoutY="171.0" mnemonicParsing="false" onAction="#saveDinnerSetting" prefHeight="26.0" prefWidth="90.0" text="Додати" />
+                                <Button fx:id="addDinnerSettingButton" layoutX="129.0" layoutY="171.0" mnemonicParsing="false" onAction="#saveDinnerSetting" prefHeight="26.0" prefWidth="90.0" text="Додати" />
                                 <TableView fx:id="dinnerTable" editable="true" layoutX="309.0" layoutY="7.0" prefHeight="448.0" prefWidth="388.0">
                                     <columns>
                                         <TableColumn fx:id="dinnerIdColumn" editable="false" prefWidth="75.0" text="ID" visible="false" />
@@ -48,7 +60,7 @@
                                 <Text layoutX="14.0" layoutY="70.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Дата початку" />
                                 <Text layoutX="14.0" layoutY="111.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Вартість" wrappingWidth="55.57891845703125" />
                                 <NumberField fx:id="price" layoutX="100.0" layoutY="94.0" />
-                                <Button layoutX="631.0" layoutY="473.0" mnemonicParsing="false" onAction="#saveDinnerSettingTable" text="Зберегти" />
+                                <Button fx:id="saveDinnerTableButton" layoutX="631.0" layoutY="473.0" mnemonicParsing="false" onAction="#saveDinnerSettingTable" text="Зберегти" />
                             </children>
                         </AnchorPane>
                     </content>

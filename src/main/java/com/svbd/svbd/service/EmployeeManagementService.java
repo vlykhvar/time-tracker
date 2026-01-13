@@ -7,6 +7,8 @@ import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.entity.Salary;
 import com.svbd.svbd.exception.OverlapingDateException;
 import com.svbd.svbd.repository.employee.EmployeeRepository;
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -15,11 +17,18 @@ import static com.svbd.svbd.converter.EmployeeConverter.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+@Service
 public class EmployeeManagementService {
 
-    private final EmployeeService employeeService = new EmployeeService();
-    private final EmployeeRepository repository = new EmployeeRepository();
-    private final SalaryService salaryService = new SalaryService();
+    private final EmployeeService employeeService;
+    private final EmployeeRepository repository;
+    private final SalaryService salaryService;
+
+    public EmployeeManagementService(EmployeeService employeeService, EmployeeRepository repository, SalaryService salaryService) {
+        this.employeeService = employeeService;
+        this.repository = repository;
+        this.salaryService = salaryService;
+    }
 
     public Set<EmployeeShortBO> getAllShortEmployeesData() {
         return toEmployeeShortBO(repository.findAllEmployeeIdAndName());
@@ -67,7 +76,7 @@ public class EmployeeManagementService {
         salaryService.removeSalaryById(salaryIdsForDelete);
         employee.getSalaries().clear();
         employee.getSalaries().addAll(adjustingAndCheckingSalaryDates(salariesForChecking));
-        repository.updateEmployee(employee);
+        repository.save(employee);
     }
 
     private List<Salary> adjustingAndCheckingSalaryDates(Collection<Salary> salaries) {

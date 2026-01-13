@@ -13,6 +13,7 @@ import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,6 +31,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.poi.ss.usermodel.BorderStyle.*;
 import static org.apache.poi.xssf.usermodel.XSSFFont.DEFAULT_FONT_NAME;
 
+@Service
 public class ReportsService {
 
     private static final String MAIN_REPORT_HEADER = "Звіт компанії %s з %s по %s";

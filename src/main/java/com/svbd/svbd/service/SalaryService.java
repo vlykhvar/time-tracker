@@ -4,11 +4,13 @@ import com.svbd.svbd.entity.Salary;
 import com.svbd.svbd.repository.projection.SalaryEmployeeProjection;
 import com.svbd.svbd.repository.salary.SalaryRepository;
 import org.hibernate.HibernateException;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+@Service
 public class SalaryService {
 
     private final SalaryRepository repository = new SalaryRepository();

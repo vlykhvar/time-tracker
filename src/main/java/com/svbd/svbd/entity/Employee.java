@@ -22,7 +22,7 @@ public class Employee extends CreatedAtRemovedAt {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "employee", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "employee", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private final List<Salary> salaries = new ArrayList<>();
 
     @OneToMany(mappedBy = "employee", orphanRemoval = true, cascade = CascadeType.ALL)

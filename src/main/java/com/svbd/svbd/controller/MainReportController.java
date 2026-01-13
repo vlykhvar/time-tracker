@@ -4,12 +4,15 @@ import com.svbd.svbd.dto.report.MainReport;
 import com.svbd.svbd.exception.StartDateAfterEndDateException;
 import com.svbd.svbd.service.ReportsService;
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.stage.Stage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,9 +23,14 @@ import java.util.ResourceBundle;
 import static com.svbd.svbd.enums.Exceptions.START_DATE_AFTER_EXCEPTION;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
 
-public class MainReportController extends Application implements Initializable {
+@Component
+public class MainReportController implements Initializable {
 
-    private final ReportsService reportsService = new ReportsService();
+    @Autowired
+    private ReportsService reportsService;
+
+    @Autowired
+    private HostServices hostServices;
 
     @FXML
     private DatePicker dateFrom;
@@ -42,14 +50,9 @@ public class MainReportController extends Application implements Initializable {
         var request = new MainReport(dateFrom.getValue(), dateTo.getValue());
         var patch = reportsService.generateMainRepost(request);
         File excelFile = new File(patch);
-        getHostServices().showDocument(excelFile.toURI().toURL().toExternalForm());
+        hostServices.showDocument(excelFile.toURI().toURL().toExternalForm());
         var s = (Stage) makeReport.getScene().getWindow();
         s.close();
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-
     }
 
     @Override

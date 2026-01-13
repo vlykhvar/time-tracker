@@ -9,6 +9,7 @@ import com.svbd.svbd.exception.OverlapingDateException;
 import com.svbd.svbd.repository.settings.CompanySettingsRepository;
 import com.svbd.svbd.repository.settings.DinnerSettingRepository;
 import com.svbd.svbd.util.DateTimeUtil;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -19,10 +20,16 @@ import static com.svbd.svbd.converter.SettingsConverter.*;
 import static com.svbd.svbd.util.DateTimeUtil.validateStartAndEndDate;
 import static java.util.Objects.nonNull;
 
+@Service
 public class SettingsManagementService {
 
-    private final CompanySettingsRepository companySettingsRepository = new CompanySettingsRepository();
-    private final DinnerSettingRepository dinnerSettingRepository = new DinnerSettingRepository();
+    private final CompanySettingsRepository companySettingsRepository;
+    private final DinnerSettingRepository dinnerSettingRepository;
+
+    public SettingsManagementService(CompanySettingsRepository companySettingsRepository, DinnerSettingRepository dinnerSettingRepository) {
+        this.companySettingsRepository = companySettingsRepository;
+        this.dinnerSettingRepository = dinnerSettingRepository;
+    }
 
     public CompanySettingsBO getCompanySettings() {
         CompanySettings companySettings;

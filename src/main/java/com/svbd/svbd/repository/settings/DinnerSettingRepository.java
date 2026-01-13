@@ -3,12 +3,14 @@ package com.svbd.svbd.repository.settings;
 import com.svbd.svbd.entity.DinnerSetting;
 import com.svbd.svbd.settings.HibernateModule;
 import org.hibernate.HibernateException;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+@Component
 public class DinnerSettingRepository {
 
     public List<DinnerSetting> findAll() {

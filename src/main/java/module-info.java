@@ -11,19 +11,30 @@ module com.svbd.svbd {
     requires jakarta.persistence;
     requires jakarta.activation;
     requires java.naming;
-    requires jdk.internal.opt;
     requires org.apache.poi.poi;
     requires org.apache.poi.ooxml;
+    requires spring.boot;
+    requires spring.boot.autoconfigure;
+    requires spring.context;
+    requires spring.core;
+    requires spring.beans;
+    requires spring.data.jpa;
+    requires spring.data.commons;
+    requires jakarta.annotation;
 
-    opens com.svbd.svbd to javafx.fxml, javafx.base;
-    opens com.svbd.svbd.controller to javafx.fxml, javafx.base;
-    opens com.svbd.svbd.entity to org.hibernate.orm.core, javafx.base, javafx.fxml;
+    opens com.svbd.svbd to javafx.fxml, javafx.graphics, spring.core, spring.beans, spring.context;
+    opens com.svbd.svbd.controller to javafx.fxml, spring.core, spring.beans, spring.context, javafx.base;
+    opens com.svbd.svbd.entity to org.hibernate.orm.core, javafx.base, javafx.fxml, spring.core;
     opens com.svbd.svbd.dto.employee to javafx.base, javafx.fxml;
     opens com.svbd.svbd.dto.shift.row to javafx.base, javafx.fxml;
     opens com.svbd.svbd.repository.projection to org.hibernate.orm.core;
     opens com.svbd.svbd.dto.salary to javafx.base;
-    opens com.svbd.svbd.service to javafx.base, javafx.fxml;
+    opens com.svbd.svbd.service to spring.beans, spring.context, spring.core;
     opens com.svbd.svbd.dto.report to javafx.base, javafx.fxml;
+    opens com.svbd.svbd.repository.employee to spring.beans, spring.context, spring.core;
+    opens com.svbd.svbd.repository.settings to spring.beans, spring.context, spring.core;
+    opens com.svbd.svbd.repository.shift to spring.beans, spring.context, spring.core;
+    opens com.svbd.svbd.util to spring.beans, spring.context, spring.core;
     opens com.svbd.svbd.dto.settings to javafx.base, javafx.fxml;
 
     exports com.svbd.svbd;
