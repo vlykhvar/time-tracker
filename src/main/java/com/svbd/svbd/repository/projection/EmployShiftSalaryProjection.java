@@ -2,42 +2,13 @@ package com.svbd.svbd.repository.projection;
 
 import java.time.LocalDate;
 
-public class EmployShiftSalaryProjection {
+public interface EmployShiftSalaryProjection {
 
-    private Long employeeId;
-    private String name;
-    private LocalDate shiftDate;
-    private Long salary;
+     Long getEmployeeId();
 
-    public Long getEmployeeId() {
-        return employeeId;
-    }
+     String getName();
 
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
+     LocalDate getShiftDate();
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDate getShiftDate() {
-        return shiftDate;
-    }
-
-    public void setShiftDate(LocalDate shiftDate) {
-        this.shiftDate = shiftDate;
-    }
-
-    public Long getSalary() {
-        return salary;
-    }
-
-    public void setSalary(Long salary) {
-        this.salary = salary;
-    }
+     Long getSalary();
 }

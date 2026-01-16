@@ -8,10 +8,12 @@ import com.svbd.svbd.entity.ShiftRow;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.svbd.svbd.util.DateTimeUtil.getStringHourAndMinuteFromLocalDateTime;
+import static java.util.Objects.nonNull;
 
 public final class ShiftRowConverter {
 
@@ -21,8 +23,12 @@ public final class ShiftRowConverter {
     public static ShiftRowBO toShiftRowBO(ShiftRow row) {
         var shiftRowBO = new ShiftRowBO();
         shiftRowBO.setShiftRowId(row.getId());
-        shiftRowBO.setStartShift(getStringHourAndMinuteFromLocalDateTime(row.getStartShift()));
-        shiftRowBO.setEndShift(getStringHourAndMinuteFromLocalDateTime(row.getEndShift()));
+        if (nonNull(row.getStartShift())) {
+            shiftRowBO.setStartShift(row.getStartShift().toLocalTime());
+        }
+        if (nonNull(row.getEndShift())) {
+            shiftRowBO.setEndShift(row.getEndShift().toLocalTime());
+        }
         shiftRowBO.setEmployeeId(row.getEmployee().getEmployeeId());
         shiftRowBO.setEmployeeName(row.getEmployee().getName());
         shiftRowBO.setTotalWorkTime(row.getTotalTime());
@@ -35,10 +41,10 @@ public final class ShiftRowConverter {
                 .collect(Collectors.toSet());
     }
 
-    public static ShiftRow toShiftRow(ShiftRowRequestBO shiftRowBO) {
+    public static ShiftRow toShiftRow(ShiftRowRequestBO shiftRowBO, Map<Long, Employee> employeeMap) {
         var shiftRow = new ShiftRow();
         shiftRow.setId(shiftRowBO.getShiftRowId());
-        shiftRow.setEmployee(new Employee(shiftRowBO.getEmployeeId()));
+        shiftRow.setEmployee(employeeMap.get(shiftRowBO.getEmployeeId()));
         shiftRow.setShift(new Shift(shiftRowBO.getShiftDate()));
         shiftRow.setStartShift(shiftRowBO.getStartShift());
         shiftRow.setEndShift(shiftRowBO.getEndShift());
@@ -46,9 +52,10 @@ public final class ShiftRowConverter {
         return shiftRow;
     }
 
-    public static List<ShiftRow> toShiftRow(Collection<ShiftRowRequestBO> shiftRowBOs) {
+    public static List<ShiftRow> toShiftRow(Collection<ShiftRowRequestBO> shiftRowBOs, Map<Long, Employee> employeeMap) {
         return shiftRowBOs.stream()
-                .map(ShiftRowConverter::toShiftRow)
+                .map(shiftRowRequestBO -> toShiftRow(shiftRowRequestBO, employeeMap))
+                .filter(shiftRow -> Objects.nonNull(shiftRow.getEmployee()))
                 .toList();
     }
 }

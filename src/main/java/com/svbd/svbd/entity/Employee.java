@@ -68,7 +68,7 @@ public class Employee extends CreatedAtRemovedAt {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Employee employee = (Employee) o;
-        return employeeId == employee.employeeId && Objects.equals(name, employee.name) && Objects.equals(phoneNumber, employee.phoneNumber);
+        return Objects.equals(employeeId, employee.employeeId) && Objects.equals(name, employee.name) && Objects.equals(phoneNumber, employee.phoneNumber);
     }
 
     @Override

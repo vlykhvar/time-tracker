@@ -1,82 +1,39 @@
 package com.svbd.svbd.repository.shift;
 
 import com.svbd.svbd.entity.Shift;
-import com.svbd.svbd.settings.HibernateModule;
-import org.hibernate.HibernateException;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
+/**
+ * Spring Data JPA repository for the Shift entity.
+ * The primary key for Shift is LocalDate.
+ */
+@Repository
+public interface ShiftRepository extends JpaRepository<Shift, LocalDate> {
 
-public class ShiftRepository {
+    /**
+     * Finds a single Shift by its date, eagerly fetching the associated shiftRows
+     * to prevent N+1 query problems.
+     *
+     * @param shiftDate The date of the shift to find.
+     * @return An Optional containing the Shift if found.
+     */
+    @Query("SELECT s FROM Shift s LEFT JOIN FETCH s.shiftRows WHERE s.shiftDate = :shiftDate")
+    Optional<Shift> findByIdWithShiftRows(@Param("shiftDate") LocalDate shiftDate);
 
-    public Optional<Shift> getShiftByDate(LocalDate shiftDate) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createQuery("FROM Shift s LEFT JOIN FETCH s.shiftRows sr WHERE s.shiftDate = :shiftDate");
-        query.setParameter("shiftDate", shiftDate);
-        var shift = (Shift) query.getSingleResultOrNull();
-        session.close();
-        return ofNullable(shift);
-    }
-
-    public Optional<Shift> findShiftByDateJoinShiftRows(LocalDate shiftDate) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createQuery("FROM Shift s LEFT JOIN FETCH s.shiftRows WHERE s.shiftDate = :shiftDate");
-        query.setParameter("shiftDate", shiftDate);
-        var shift = (Shift) query.getSingleResultOrNull();
-        session.close();
-        return ofNullable(shift);
-    }
-
-    public LocalDate createShift(Shift shift) {
-        LocalDate date;
-        var session = HibernateModule.getSessionFactory().openSession();
-        var transaction = session.beginTransaction();
-        try {
-            date = (LocalDate) session.save(shift);
-            transaction.commit();
-            session.close();
-            return date;
-        } catch (HibernateException e) {
-            transaction.rollback();
-            session.close();
-            throw new HibernateException(e);
-        }
-    }
-
-    public void updateShift(Shift shift) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var transaction = session.beginTransaction();
-        try {
-            session.saveOrUpdate(shift);
-            transaction.commit();
-            session.close();
-        } catch (HibernateException e) {
-            transaction.rollback();
-            session.close();
-            throw new HibernateException(e);
-        }
-    }
-
-    public boolean existRowByDate(LocalDate shiftDate) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createQuery("SELECT count(*) > 0 FROM Shift s WHERE s.shiftDate = :shiftDate");
-        query.setParameter("shiftDate", shiftDate);
-        var result = (Boolean) query.uniqueResult();
-        session.close();
-        return result;
-    }
-
-    public List<Shift> findAllShiftsInPeriod(LocalDate dateFrom, LocalDate dateTo) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createQuery("FROM Shift s LEFT JOIN FETCH s.shiftRows sr WHERE s.shiftDate >= :dateFrom " +
-                "AND (:dateTo IS NULL OR s.shiftDate <= :dateTo)");
-        query.setParameter("dateFrom", dateFrom);
-        query.setParameter("dateTo", dateTo);
-        var result = (List<Shift>) query.getResultList();
-        session.close();
-        return result;
-    }
+    /**
+     * Finds all Shifts within a given date range, eagerly fetching the associated shiftRows.
+     *
+     * @param dateFrom The start date of the period (inclusive).
+     * @param dateTo The end date of the period (inclusive).
+     * @return A list of Shifts found within the period.
+     */
+    @Query("SELECT s FROM Shift s LEFT JOIN FETCH s.shiftRows WHERE s.shiftDate BETWEEN :dateFrom AND :dateTo")
+    List<Shift> findAllInPeriodWithShiftRows(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo);
 }

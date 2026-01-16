@@ -1,5 +1,7 @@
 package com.svbd.svbd;
 
+import com.svbd.svbd.enums.Pages;
+import com.svbd.svbd.util.StageManager;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -9,15 +11,20 @@ import org.springframework.context.annotation.Bean;
 
 import java.io.IOException;
 
-import static com.svbd.svbd.util.StageUtil.creatMainStage;
-
 public class Application extends javafx.application.Application {
 
     private ConfigurableApplicationContext springContext;
 
     @Override
     public void start(Stage stage) throws IOException {
-        creatMainStage(stage, springContext);
+        // Получаем наш StageManager из контекста Spring
+        StageManager stageManager = springContext.getBean(StageManager.class);
+
+        // Используем его для загрузки главной сцены
+        var result = stageManager.load(Pages.MAIN_PAGE);
+        stage.setScene(result.scene());
+        stage.setTitle("Time Tracker");
+        stage.show();
     }
 
     @Override

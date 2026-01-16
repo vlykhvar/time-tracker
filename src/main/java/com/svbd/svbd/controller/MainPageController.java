@@ -12,18 +12,21 @@ import com.svbd.svbd.service.SettingsManagementService;
 import com.svbd.svbd.service.ShiftManagementService;
 import com.svbd.svbd.util.StageManager;
 import javafx.application.HostServices;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,12 +37,10 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
+import java.util.stream.Stream;
 
 import static com.svbd.svbd.enums.Pages.*;
 import static com.svbd.svbd.util.AlertUtil.showAlert;
-import static com.svbd.svbd.util.ConstantUtil.TIME_REGEX;
 import static com.svbd.svbd.util.DateTimeUtil.prepareWorkTotalTime;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -77,7 +78,7 @@ public class MainPageController implements Initializable {
     private DatePicker datePicker;
 
     @FXML
-    private AnchorPane anchorPane; // Убедитесь, что у корневого AnchorPane есть этот fx:id
+    private AnchorPane anchorPane;
 
     @FXML
     private TableView<ShiftRowBO> shiftEmployeeData;
@@ -92,10 +93,10 @@ public class MainPageController implements Initializable {
     private TableColumn<ShiftRowBO, String> employeeName;
 
     @FXML
-    private TableColumn<ShiftRowBO, String> endEmployeeShift;
+    private TableColumn<ShiftRowBO, LocalTime> endEmployeeShift;
 
     @FXML
-    private TableColumn<ShiftRowBO, String> startEmployeeShift;
+    private TableColumn<ShiftRowBO, LocalTime> startEmployeeShift;
 
     @FXML
     private TableColumn<ShiftRowBO, Integer> totalWorkTime;
@@ -133,8 +134,10 @@ public class MainPageController implements Initializable {
     @FXML
     void openAbout(ActionEvent event) {
         try {
-            // Используем новый StageManager для открытия окна
-            stageManager.showModalStage(ABOUT, anchorPane.getScene(), "Про програму");
+            StageManager.FxmlLoadResult<Object> result = stageManager.load(ABOUT);
+            Stage stage = stageManager.createModalStage(anchorPane.getScene(), "Про програму");
+            stage.setScene(result.scene());
+            stage.showAndWait();
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
         }
@@ -157,8 +160,7 @@ public class MainPageController implements Initializable {
             shift.setDailyRevenue(checkAndChangeStringToLong(dailyRevenue));
             var rows = new HashSet<ShiftRowRequestBO>();
             for (ShiftRowBO row : shiftEmployeeData.getItems()) {
-                if (nonNull(row.getStartShift()) && !row.getStartShift().isEmpty() ||
-                        nonNull(row.getShiftRowId())) {
+                if (nonNull(row.getStartShift()) || nonNull(row.getShiftRowId())) {
                     var shiftRowRequestBO = toShiftRowRequestBO(row);
                     rows.add(shiftRowRequestBO);
                 }
@@ -186,7 +188,10 @@ public class MainPageController implements Initializable {
     @FXML
     void showReportScene(ActionEvent event) {
         try {
-            stageManager.showModalStage(REPORTS_PAGE, anchorPane.getScene(), "Звіти");
+            StageManager.FxmlLoadResult<Object> result = stageManager.load(REPORTS_PAGE);
+            Stage stage = stageManager.createModalStage(anchorPane.getScene(), "Звіти");
+            stage.setScene(result.scene());
+            stage.showAndWait();
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
         }
@@ -195,19 +200,21 @@ public class MainPageController implements Initializable {
     @FXML
     void showSettings(ActionEvent event) {
         try {
-            stageManager.showModalStage(SETTINGS_PAGE, anchorPane.getScene(), "Налаштування");
+            StageManager.FxmlLoadResult<Object> result = stageManager.load(SETTINGS_PAGE);
+            Stage stage = stageManager.createModalStage(anchorPane.getScene(), "Налаштування");
+            stage.setScene(result.scene());
+            stage.showAndWait();
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
         }
     }
-
 
     @FXML
     void validateUser() throws IncorrectPasswordException {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Необхідна автентифікація");
         dialog.setHeaderText("Для входу в розділ управління необхідно введення пароля.");
-        dialog.setGraphic(new Circle(15, Color.RED)); // Custom graphic
+        dialog.setGraphic(new Circle(15, Color.RED));
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         PasswordField pwd = new PasswordField();
@@ -235,7 +242,7 @@ public class MainPageController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         datePicker.setConverter(new StringConverter<LocalDate>() {
-            private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             @Override
             public String toString(LocalDate localDate) {
@@ -253,30 +260,51 @@ public class MainPageController implements Initializable {
             }
         });
         initDateOnFirstOpen();
-        datePicker.setOnAction((event) -> {
-            prepareData();
-        });
+        datePicker.setOnAction((event) -> prepareData());
         prepareData();
         editTable();
     }
 
     private void editTable() {
-        startEmployeeShift.setCellFactory(TextFieldTableCell.forTableColumn());
+        List<LocalTime> timeSlots = generateTimeSlots();
+        StringConverter<LocalTime> timeConverter = new StringConverter<>() {
+            private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            @Override
+            public String toString(LocalTime time) {
+                return time != null ? formatter.format(time) : "--:--";
+            }
+
+            @Override
+            public LocalTime fromString(String string) {
+                return string != null && !string.equals("--:--") ? LocalTime.parse(string, formatter) : null;
+            }
+        };
+
+        startEmployeeShift.setCellFactory(ComboBoxTableCell.forTableColumn(timeConverter, FXCollections.observableArrayList(timeSlots)));
         startEmployeeShift.setOnEditCommit(event -> {
-                    var shift = (ShiftRowBO) event.getTableView().getItems().get(
-                            event.getTablePosition().getRow());
-                    shift.setStartShift(checkIfValueIsTime(event.getOldValue(), event.getNewValue()));
-                    shift.setTotalWorkTime(prepareTotalTime(shift.getStartShift(), shift.getEndShift()));
-                }
-        );
-        endEmployeeShift.setCellFactory(TextFieldTableCell.forTableColumn());
+            var shift = event.getRowValue();
+            shift.setStartShift(event.getNewValue());
+            shift.setTotalWorkTime(prepareTotalTime(shift.getStartShift(), shift.getEndShift()));
+            shiftEmployeeData.refresh();
+        });
+
+        endEmployeeShift.setCellFactory(ComboBoxTableCell.forTableColumn(timeConverter, FXCollections.observableArrayList(timeSlots)));
         endEmployeeShift.setOnEditCommit(event -> {
-                    var shift = (ShiftRowBO) event.getTableView().getItems().get(
-                            event.getTablePosition().getRow());
-                    shift.setEndShift(checkIfValueIsTime(event.getOldValue(), event.getNewValue()));
-                    shift.setTotalWorkTime(prepareTotalTime(shift.getStartShift(), shift.getEndShift()));
-                }
-        );
+            var shift = event.getRowValue();
+            shift.setEndShift(event.getNewValue());
+            shift.setTotalWorkTime(prepareTotalTime(shift.getStartShift(), shift.getEndShift()));
+            shiftEmployeeData.refresh();
+        });
+    }
+
+    private List<LocalTime> generateTimeSlots() {
+        List<LocalTime> timeSlots = new ArrayList<>();
+        timeSlots.add(null);
+        timeSlots.addAll(Stream.iterate(LocalTime.MIN, time -> time.plusMinutes(30))
+                .limit(48)
+                .collect(Collectors.toList()));
+        return timeSlots;
     }
 
     private void prepareData() {
@@ -316,7 +344,6 @@ public class MainPageController implements Initializable {
                 .collect(Collectors.toSet());
         shiftEmployeeData.getItems().clear();
         shiftEmployeeData.getItems().addAll(shifts.stream().sorted(Comparator.comparing(ShiftRowBO::getEmployeeName)).toList());
-
     }
 
     private void prepareShiftRowTableWithData(Collection<ShiftRowBO> rowBOs) {
@@ -334,81 +361,70 @@ public class MainPageController implements Initializable {
     }
 
     private void initDateOnFirstOpen() {
-        LocalDate initDate;
-        if (LocalDateTime.now().getHour() < 7) {
-            initDate = LocalDate.now().minusDays(1);
-        } else {
-            initDate = LocalDate.now();
-        }
+        LocalDate initDate = LocalDateTime.now().getHour() < 7 ? LocalDate.now().minusDays(1) : LocalDate.now();
         datePicker.setValue(initDate);
     }
 
     private Long checkAndChangeStringToLong(TextField textField) {
-        if (isNull(textField.getText()) || textField.getText().isBlank() || textField.getText().isEmpty()) {
+        if (isNull(textField.getText()) || textField.getText().isBlank()) {
             return 0L;
         }
         try {
             return Long.valueOf(textField.getText());
         } catch (NumberFormatException e) {
-            var alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Тільки цифрові значення");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR, "Помилка", "Тільки цифрові значення");
             throw e;
         }
     }
 
     private String adjustLong(Long number) {
-        return isNull(number) ? Long.valueOf(0).toString() : number.toString();
+        return isNull(number) ? "0" : number.toString();
     }
 
-    private String checkIfValueIsTime(String oldValue, String newValue) {
-        if (newValue.isEmpty() || newValue.matches(TIME_REGEX)) {
-            return newValue;
-        } else {
-            showAlert(Alert.AlertType.ERROR, "Hе корректний формат", "Формат має бути у вигляді HH:mm");
-            return oldValue;
+    private Integer prepareTotalTime(LocalTime startShift, LocalTime endShift) {
+        // Return 0 if either time is null or if they are equal
+        if (isNull(startShift) || isNull(endShift) || startShift.equals(endShift)) {
+            return 0;
         }
-    }
 
-    private Integer prepareTotalTime(String startShift, String endShift) {
-        if (nonNull(startShift) && !startShift.isEmpty() && nonNull(endShift) && !endShift.isEmpty() &&
-                startShift.matches(TIME_REGEX) && endShift.matches(TIME_REGEX)) {
-            var currentDate = datePicker.getValue();
-            var startShiftTime = LocalTime.parse(startShift);
-            var endShiftTime = LocalTime.parse(endShift);
-            return prepareWorkTotalTime(currentDate, startShiftTime, endShiftTime);
-        }
-        return 0;
+        var currentDate = datePicker.getValue();
+        Integer totalTime = prepareWorkTotalTime(currentDate, startShift, endShift);
+
+        // Ensure the result is never null
+        return nonNull(totalTime) ? totalTime : 0;
     }
 
     private ShiftRowRequestBO toShiftRowRequestBO(ShiftRowBO shiftRowBO) throws Exception {
         var shiftRowRequest = new ShiftRowRequestBO();
-        if (prepareTotalTime(shiftRowBO.getStartShift(), shiftRowBO.getEndShift()) >= 0) {
+        Integer totalWorkTime = prepareTotalTime(shiftRowBO.getStartShift(), shiftRowBO.getEndShift());
+
+        if (totalWorkTime >= 0) {
             shiftRowRequest.setEmployeeId(shiftRowBO.getEmployeeId());
             shiftRowRequest.setEmployeeName(shiftRowBO.getEmployeeName());
             shiftRowRequest.setShiftRowId(shiftRowBO.getShiftRowId());
             shiftRowRequest.setShiftDate(datePicker.getValue());
-            var currentDate = datePicker.getValue();
-            var startShiftTime = LocalTime.parse(shiftRowBO.getStartShift());
-            var endShiftTime = LocalTime.parse(shiftRowBO.getEndShift());
-            LocalDateTime startShiftLocalDateTime;
-            if (startShiftTime.getHour() < 7) {
-                startShiftLocalDateTime = LocalDateTime.of(currentDate.plusDays(1), startShiftTime);
+
+            if (nonNull(shiftRowBO.getStartShift()) && nonNull(shiftRowBO.getEndShift())) {
+                var currentDate = datePicker.getValue();
+                LocalDateTime startShiftDateTime = LocalDateTime.of(currentDate, shiftRowBO.getStartShift());
+                LocalDateTime endShiftDateTime = LocalDateTime.of(currentDate, shiftRowBO.getEndShift());
+
+                if (startShiftDateTime.toLocalTime().isAfter(endShiftDateTime.toLocalTime())) {
+                    endShiftDateTime = endShiftDateTime.plusDays(1);
+                }
+
+                shiftRowRequest.setStartShift(startShiftDateTime);
+                shiftRowRequest.setEndShift(endShiftDateTime);
+                shiftRowRequest.setTotalWorkTime(prepareWorkTotalTime(startShiftDateTime, endShiftDateTime));
             } else {
-                startShiftLocalDateTime = LocalDateTime.of(currentDate, startShiftTime);
+                shiftRowRequest.setStartShift(null);
+                shiftRowRequest.setEndShift(null);
+                shiftRowRequest.setTotalWorkTime(0);
             }
-            LocalDateTime endShiftLocalDateTime;
-            if (endShiftTime.getHour() > 0 && endShiftTime.getHour() < 8) {
-                endShiftLocalDateTime = LocalDateTime.of(currentDate.plusDays(1L), endShiftTime);
-            } else {
-                endShiftLocalDateTime = LocalDateTime.of(currentDate, endShiftTime);
-            }
-            shiftRowRequest.setStartShift(startShiftLocalDateTime);
-            shiftRowRequest.setEndShift(endShiftLocalDateTime);
-            shiftRowRequest.setTotalWorkTime(prepareWorkTotalTime(startShiftLocalDateTime, endShiftLocalDateTime));
         }
+
         if (shiftRowRequest.getTotalWorkTime() < 0) {
-            showAlert(Alert.AlertType.ERROR, "Невірвно вказаний час",
+            showAlert(Alert.AlertType.ERROR, "Невірно вказаний час",
                     String.format("Співробітник %s має не вірний час зміни", shiftRowRequest.getEmployeeName()));
             throw new Exception();
         }

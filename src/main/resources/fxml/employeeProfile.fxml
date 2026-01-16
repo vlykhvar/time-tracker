@@ -1,24 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.svbd.svbd.controller.customfield.*?>
+<?import com.svbd.svbd.controller.customfield.NumberField?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="425" prefWidth="329" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.EmployeeProfileController">
+<AnchorPane fx:id="anchorPane" styleClass="profile-pane" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.EmployeeProfileController">
     <children>
-        <TextField fx:id="employeeIdField" alignment="CENTER" disable="true" editable="false" prefHeight="0.0" prefWidth="0.0" visible="false" />
-        <TableView fx:id="salaryTable" editable="true" layoutX="6.0" layoutY="101.0" prefHeight="262.4" prefWidth="317.0">
+        <VBox spacing="10" AnchorPane.topAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0">
+            <children>
+                <TextField fx:id="employeeIdField" visible="false" managed="false" />
+
+                <Label text="ПІБ" styleClass="profile-label" />
+                <TextField fx:id="name" promptText="Повне ім'я" styleClass="profile-input" prefHeight="35.0" />
+
+                <Label text="Номер Телефону" styleClass="profile-label" />
+                <NumberField fx:id="phoneNumber" promptText="+380..." styleClass="profile-input" prefHeight="35.0" />
+            </children>
+        </VBox>
+
+        <TableView fx:id="salaryTable" editable="true" layoutY="170.0" styleClass="profile-table" AnchorPane.topAnchor="170.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0">
             <columns>
-                <TableColumn fx:id="id" editable="false" prefWidth="75.0" text="ID" visible="false" />
-                <TableColumn fx:id="perHour" prefWidth="112.79998779296875" text="Ставка за годину" />
-                <TableColumn fx:id="startDate" prefWidth="96.800048828125" text="Початок" />
-                <TableColumn fx:id="endDate" prefWidth="104.79998779296875" text="Кінець" />
+                <TableColumn fx:id="id" text="ID" visible="false" />
+                <TableColumn fx:id="perHour" text="Ставка за годину" prefWidth="120.0" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="startDate" text="Початок" prefWidth="100.0" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="endDate" text="Кінець" prefWidth="100.0" style="-fx-alignment: CENTER;"/>
             </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
         </TableView>
-        <TextField fx:id="name" alignment="CENTER" layoutX="31" layoutY="21.0" prefHeight="26.4" prefWidth="267.0" />
-        <NumberField fx:id="phoneNumber" alignment="CENTER" layoutX="29.5" layoutY="69.0" prefHeight="26.4" prefWidth="267.0" />
-        <Label layoutX="153.0" layoutY="3.0" prefHeight="18.0" prefWidth="23.0" text="ПІБ" />
-        <Label layoutX="116.0" layoutY="50.0" prefHeight="18.4" prefWidth="94.4" text="Номер Телефону" />
-        <Button fx:id="save" layoutX="125.0" layoutY="374.0" mnemonicParsing="false" onAction="#saveEmployee" prefHeight="26.4" prefWidth="76.0" text="Зберегти" />
+
+        <Button fx:id="save" text="Зберегти" onAction="#saveEmployee" styleClass="save-button" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
     </children>
 </AnchorPane>

@@ -13,7 +13,9 @@ import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,9 +46,16 @@ public class ReportsService {
     private static final String CASH_KEY_ON_EVENING_FIELD = "Каса ключі на вечір";
     private static final String TAXI = "Таксі";
 
-    private final ShiftRepository shiftRepository = new ShiftRepository();
-    private final ShiftRowRepository shiftRowRepository = new ShiftRowRepository();
-    private final CompanySettingsRepository companySettingsRepository = new CompanySettingsRepository();
+    private final ShiftRepository shiftRepository;
+    private final ShiftRowRepository shiftRowRepository;
+    private final CompanySettingsRepository companySettingsRepository;
+
+    @Autowired
+    public ReportsService(ShiftRepository shiftRepository, ShiftRowRepository shiftRowRepository, CompanySettingsRepository companySettingsRepository) {
+        this.shiftRepository = shiftRepository;
+        this.shiftRowRepository = shiftRowRepository;
+        this.companySettingsRepository = companySettingsRepository;
+    }
 
     public String generateMainRepost(MainReport request) throws IOException {
         var workbook = new XSSFWorkbook();
@@ -85,139 +94,173 @@ public class ReportsService {
         return fileLocation;
     }
 
+    @Transactional(readOnly = true)
     public String generateDailyReport(LocalDate date) throws IOException {
-        var shift = shiftRepository.getShiftByDate(date).get();
-        var workbook = new XSSFWorkbook();
-        var sheet = workbook.createSheet(formatDateForShowing(shift.getShiftDate()));
-        var row = sheet.createRow(0);
-        var cell = row.createCell(0);
-        cell.setCellValue("Дата зміни " + formatDateForShowing(shift.getShiftDate()));
-        row = sheet.createRow(1);
-        cell = row.createCell(2);
-        cell.setCellValue("ПІБ");
-        cell = row.createCell(4);
-        cell.setCellValue("Бонус години");
-        cell = row.createCell(6);
-        cell.setCellValue(shift.getBonusTime());
-        row = sheet.createRow(2);
-        cell = row.createCell(3);
-        cell.setCellValue("Розпочав");
-        cell = row.createCell(4);
-        cell.setCellValue("Закінчив");
-        cell = row.createCell(5);
-        cell.setCellValue("Робочих годин");
-        cell = row.createCell(6);
-        cell.setCellValue("Всього годин");
-        row = sheet.createRow(3);
-        cell = row.createCell(0);
-        cell.setCellValue(CASH_ON_MORNING_FIELD);
-        cell = row.createCell(1);
-        cell.setCellValue(shift.getCashOnMorning());
-        row = sheet.createRow(4);
-        cell = row.createCell(0);
-        cell.setCellValue(CASH_FIELD);
-        cell = row.createCell(1);
-        cell.setCellValue(shift.getTotalCash());
-        row = sheet.createRow(5);
-        cell = row.createCell(0);
-        cell.setCellValue(CASH_ON_EVENING_FIELD);
-        cell = row.createCell(1);
-        cell.setCellValue(shift.getCashOnEvening());
-        row = sheet.createRow(6);
-        cell = row.createCell(0);
-        cell.setCellValue(CASH_KEY_ON_MORNING_FIELD);
-        cell = row.createCell(1);
-        cell.setCellValue(shift.getCashKeyOnMorning());
-        row = sheet.createRow(7);
-        cell = row.createCell(0);
-        cell.setCellValue(CASH_KEY_FIELD);
-        cell = row.createCell(1);
-        cell.setCellValue(shift.getCashKeyTotal());
-        row = sheet.createRow(8);
-        cell = row.createCell(0);
-        cell.setCellValue(CASH_KEY_ON_EVENING_FIELD);
-        cell = row.createCell(1);
-        cell.setCellValue(shift.getCashKeyOnEvening());
-        row = sheet.createRow(9);
-        cell = row.createCell(0);
-        cell.setCellValue(DAILY_REVENUE_FIELD);
-        cell = row.createCell(1);
-        cell.setCellValue(shift.getDailyRevenue());
-        row = sheet.createRow(10);
-        cell = row.createCell(0);
-        cell.setCellValue(TAXI);
-        cell = row.createCell(1);
-        cell.setCellValue(shift.getTaxi());
+        var shift = shiftRepository.findByIdWithShiftRows(date)
+                .orElseThrow(() -> new NoSuchElementException("Shift not found for date: " + date));
 
-        var startRow = 3;
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            var sheet = workbook.createSheet(formatDateForShowing(shift.getShiftDate()));
+            sheet.setPrintGridlines(false);
 
-        var sortedRows = shift.getShiftRows().stream()
-                .sorted(Comparator.comparing(x -> x.getEmployee().getName()))
-                .toList();
+            // --- Create Cell Styles ---
+            CellStyle titleStyle = createTitleStyle(workbook);
+            CellStyle headerStyle = createHeaderStyle(workbook);
+            CellStyle dataStyle = createDataStyle(workbook, HorizontalAlignment.CENTER);
+            CellStyle commentHeaderStyle = createHeaderStyle(workbook); // Same as header but can be customized
+            CellStyle commentDataStyle = createDataStyle(workbook, HorizontalAlignment.LEFT);
+            commentDataStyle.setWrapText(true);
 
-        for (var shiftRow : sortedRows) {
-            var startCell = 2;
-            if (isNull(sheet.getRow(startRow))) {
-                row = sheet.createRow(startRow);
-            } else {
+            // --- Build Report ---
+            Row row = sheet.createRow(0);
+            Cell cell = row.createCell(0);
+            cell.setCellValue("Дата зміни " + formatDateForShowing(shift.getShiftDate()));
+            cell.setCellStyle(titleStyle);
+
+            row = sheet.createRow(1);
+            createStyledCell(row, 2, "ПІБ", headerStyle);
+            createStyledCell(row, 4, "Бонус години", headerStyle);
+            createStyledCell(row, 6, String.valueOf(shift.getBonusTime()), dataStyle);
+
+            row = sheet.createRow(2);
+            createStyledCell(row, 3, "Розпочав", headerStyle);
+            createStyledCell(row, 4, "Закінчив", headerStyle);
+            createStyledCell(row, 5, "Робочих годин", headerStyle);
+            createStyledCell(row, 6, "Всього годин", headerStyle);
+
+            // Cash block
+            createStyledCell(sheet, 3, 0, CASH_ON_MORNING_FIELD, headerStyle);
+            createStyledCell(sheet, 3, 1, String.valueOf(shift.getCashOnMorning()), dataStyle);
+            createStyledCell(sheet, 4, 0, CASH_FIELD, headerStyle);
+            createStyledCell(sheet, 4, 1, String.valueOf(shift.getTotalCash()), dataStyle);
+            createStyledCell(sheet, 5, 0, CASH_ON_EVENING_FIELD, headerStyle);
+            createStyledCell(sheet, 5, 1, String.valueOf(shift.getCashOnEvening()), dataStyle);
+            createStyledCell(sheet, 6, 0, CASH_KEY_ON_MORNING_FIELD, headerStyle);
+            createStyledCell(sheet, 6, 1, String.valueOf(shift.getCashKeyOnMorning()), dataStyle);
+            createStyledCell(sheet, 7, 0, CASH_KEY_FIELD, headerStyle);
+            createStyledCell(sheet, 7, 1, String.valueOf(shift.getCashKeyTotal()), dataStyle);
+            createStyledCell(sheet, 8, 0, CASH_KEY_ON_EVENING_FIELD, headerStyle);
+            createStyledCell(sheet, 8, 1, String.valueOf(shift.getCashKeyOnEvening()), dataStyle);
+            createStyledCell(sheet, 9, 0, DAILY_REVENUE_FIELD, headerStyle);
+            createStyledCell(sheet, 9, 1, String.valueOf(shift.getDailyRevenue()), dataStyle);
+            createStyledCell(sheet, 10, 0, TAXI, headerStyle);
+            createStyledCell(sheet, 10, 1, String.valueOf(shift.getTaxi()), dataStyle);
+
+            var startRow = 3;
+            var sortedRows = shift.getShiftRows().stream()
+                    .sorted(Comparator.comparing(x -> x.getEmployee().getName()))
+                    .toList();
+
+            for (var shiftRow : sortedRows) {
+                if (shiftRow.getTotalTime() == 0) {
+                    continue;
+                }
                 row = sheet.getRow(startRow);
+                if (isNull(row)) {
+                    row = sheet.createRow(startRow);
+                }
+                createStyledCell(row, 2, shiftRow.getEmployee().getName(), dataStyle);
+                createStyledCell(row, 3, getStringHourAndMinuteFromLocalDateTime(shiftRow.getStartShift()), dataStyle);
+                createStyledCell(row, 4, getStringHourAndMinuteFromLocalDateTime(shiftRow.getEndShift()), dataStyle);
+                createStyledCell(row, 5, String.valueOf(shiftRow.getTotalTime()), dataStyle);
+                createStyledCell(row, 6, String.valueOf(shiftRow.getTotalTime() + shift.getBonusTime()), dataStyle);
+                startRow++;
             }
-            cell = row.createCell(startCell);
-            cell.setCellValue(shiftRow.getEmployee().getName());
-            cell = row.createCell(++startCell);
-            cell.setCellValue(getStringHourAndMinuteFromLocalDateTime(shiftRow.getStartShift()));
-            cell = row.createCell(++startCell);
-            cell.setCellValue(getStringHourAndMinuteFromLocalDateTime(shiftRow.getEndShift()));
-            cell = row.createCell(++startCell);
-            cell.setCellValue(shiftRow.getTotalTime());
-            cell = row.createCell(++startCell);
-            cell.setCellValue(shiftRow.getTotalTime() + shift.getBonusTime());
-            startRow++;
-        }
 
-        row = sheet.createRow(sheet.getLastRowNum() + 1);
-        cell = row.createCell(0);
-        cell.setCellValue("Комметарі до змінни");
-        sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, 6));
-        row = sheet.createRow(sheet.getLastRowNum() + 1);
-        cell = row.createCell(0);
-        cell.setCellValue(shift.getComments());
-        sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum() + 3, 0, 6));
+            // Comments
+            int commentStartRow = Math.max(startRow, 11);
+            row = sheet.createRow(commentStartRow);
+            createStyledCell(row, 0, "Комметарі до змінни", commentHeaderStyle);
+            sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), 0, 6));
 
+            row = sheet.createRow(commentStartRow + 1);
+            cell = row.createCell(0);
+            cell.setCellValue(shift.getComments());
+            cell.setCellStyle(commentDataStyle);
+            sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum() + 3, 0, 6));
 
+            // Merged regions (existing logic)
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 6));
+            sheet.addMergedRegion(new CellRangeAddress(1, 1, 4, 5));
+            sheet.addMergedRegion(new CellRangeAddress(1, 2, 0, 1));
+            sheet.addMergedRegion(new CellRangeAddress(1, 2, 2, 2));
 
-
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 6));
-        sheet.addMergedRegion(new CellRangeAddress(1, 1, 4, 5));
-        sheet.addMergedRegion(new CellRangeAddress(1, 2, 0, 1));
-        sheet.addMergedRegion(new CellRangeAddress(1, 2, 2, 2));
-
-        for (int i = 0; i <= sheet.getLastRowNum(); i++) {
-            row = sheet.getRow(i);
-            if (isNull(row)) {
-                continue;
+            // Auto-size columns
+            for (int i = 0; i <= 6; i++) {
+                sheet.autoSizeColumn(i);
             }
-            Iterator<Cell> headerIterator = row.cellIterator();
-            while (headerIterator.hasNext()) {
-                var cellInIteration = headerIterator.next();
-                sheet.autoSizeColumn(cellInIteration.getColumnIndex());
-                cellInIteration.setCellStyle(prepareCellStyle(workbook, WHITE, 13, false, THIN));
+
+            // --- Write to File ---
+            var currDir = new File(".");
+            var path = currDir.getAbsolutePath();
+            var fileLocation = path.substring(0, path.length() - 1) + "daily.xlsx";
+            try (var outputStream = new FileOutputStream(fileLocation)) {
+                workbook.write(outputStream);
             }
+            return fileLocation;
         }
-
-        var currDir = new File(".");
-        var path = currDir.getAbsolutePath();
-        var fileLocation = path.substring(0, path.length() - 1) + "daily.xls";
-        var outputStream = new FileOutputStream(fileLocation);
-        try {
-            workbook.write(outputStream);
-        } catch (Exception e) {
-            workbook.close();
-            outputStream.close();
-        }
-
-        return fileLocation;
     }
+
+    private void createStyledCell(Row row, int colNum, String value, CellStyle style) {
+        Cell cell = row.createCell(colNum);
+        cell.setCellValue(value);
+        cell.setCellStyle(style);
+    }
+
+    private void createStyledCell(Sheet sheet, int rowNum, int colNum, String value, CellStyle style) {
+        Row row = sheet.getRow(rowNum);
+        if (row == null) {
+            row = sheet.createRow(rowNum);
+        }
+        createStyledCell(row, colNum, value, style);
+    }
+
+    private void setBorders(CellStyle style) {
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+    }
+
+    private CellStyle createTitleStyle(Workbook workbook) {
+        Font titleFont = workbook.createFont();
+        titleFont.setFontName("Calibri");
+        titleFont.setBold(true);
+        titleFont.setFontHeightInPoints((short) 14);
+        CellStyle titleStyle = workbook.createCellStyle();
+        titleStyle.setFont(titleFont);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        return titleStyle;
+    }
+
+    private CellStyle createHeaderStyle(Workbook workbook) {
+        Font headerFont = workbook.createFont();
+        headerFont.setFontName("Calibri");
+        headerFont.setBold(true);
+        headerFont.setFontHeightInPoints((short) 11);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(headerFont);
+        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        setBorders(headerStyle);
+        return headerStyle;
+    }
+
+    private CellStyle createDataStyle(Workbook workbook, HorizontalAlignment alignment) {
+        Font dataFont = workbook.createFont();
+        dataFont.setFontName("Calibri");
+        dataFont.setFontHeightInPoints((short) 11);
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setFont(dataFont);
+        dataStyle.setAlignment(alignment);
+        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        setBorders(dataStyle);
+        return dataStyle;
+    }
+
 
     /* Private Methods */
 
@@ -278,7 +321,7 @@ public class ReportsService {
     }
 
     private void prepareEmployeeSalaryRows(Workbook workbook, Sheet sheet, LocalDate from, LocalDate to) {
-        var siftRows = shiftRowRepository.getEmployeeShiftRowsWithSalaryForPeriod(from, to);
+        var siftRows = shiftRowRepository.findEmployeeShiftSalariesForPeriod(from, to);
         var siftRowsByEmployeeAndDate = new HashMap<Long, HashMap<LocalDate, EmployShiftSalaryProjection>>();
         siftRows.forEach(siftRow -> {
             if (siftRowsByEmployeeAndDate.containsKey(siftRow.getEmployeeId())) {
@@ -407,7 +450,7 @@ public class ReportsService {
 
     private void prepareShiftRows(Workbook workbook, Sheet sheet, LocalDate from, LocalDate to) {
         var currentDateForRow = from;
-        var shifts = shiftRepository.findAllShiftsInPeriod(from, to);
+        var shifts = shiftRepository.findAllInPeriodWithShiftRows(from, to);
         var shiftByDate = shifts.stream()
                 .collect(Collectors.toMap(Shift::getShiftDate, x -> x));
         var rowTaxi = sheet.createRow(sheet.getLastRowNum() + 1);

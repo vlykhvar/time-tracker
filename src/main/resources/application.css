@@ -1,3 +1,58 @@
-.table-column{
+/* General Table Column Alignment */
+.table-column {
     -fx-alignment: center;
+}
+
+/* Profile Pane Styling */
+.profile-pane {
+    -fx-background-color: #f4f4f9;
+}
+
+/* Input Field and Label Styling */
+.profile-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.profile-input {
+    -fx-font-size: 14px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 5 10 5 10;
+}
+
+.profile-input:focused {
+    -fx-border-color: #007bff;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,123,255,0.25), 5, 0, 0, 0);
+}
+
+/* TableView Styling */
+.profile-table {
+    -fx-fixed-cell-size: 40px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.profile-table .placeholder .label {
+    -fx-text: "Немає даних для відображення";
+}
+
+/* Save Button Styling */
+.save-button {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+}
+
+.save-button:hover {
+    -fx-background-color: #0056b3;
 }

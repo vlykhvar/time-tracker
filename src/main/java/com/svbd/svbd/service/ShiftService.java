@@ -3,37 +3,41 @@ package com.svbd.svbd.service;
 import com.svbd.svbd.entity.Shift;
 import com.svbd.svbd.exception.ShiftNotFoundException;
 import com.svbd.svbd.repository.shift.ShiftRepository;
+import jakarta.persistence.Access;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ShiftService {
 
-    private ShiftRepository repository = new ShiftRepository();
+    @Autowired
+    private ShiftRepository repository;
 
-    public Shift getShiftByDate(LocalDate date) throws ShiftNotFoundException {
-        return repository.getShiftByDate(date).orElseThrow(ShiftNotFoundException::new);
+    public Optional<Shift> getShiftByDate(LocalDate date) throws ShiftNotFoundException {
+        return repository.findById(date);
     }
 
     public Shift getShiftByDateWithRows(LocalDate date) {
-        return repository.findShiftByDateJoinShiftRows(date).orElse(new Shift());
+        return repository.findByIdWithShiftRows(date).orElse(new Shift());
     }
 
     public LocalDate createShift(Shift shift) {
-        return repository.createShift(shift);
+        return repository.save(shift).getShiftDate();
     }
 
     public void updateShift(Shift shift) {
-        repository.updateShift(shift);
+        repository.save(shift);
     }
 
     public boolean existShiftByDate(LocalDate date) {
-        return repository.existRowByDate(date);
+        return repository.existsById(date);
     }
 
     public List<Shift> findAllByPeriod(LocalDate dateFrom, LocalDate dateTo) {
-        return repository.findAllShiftsInPeriod(dateFrom, dateTo);
+        return repository.findAllInPeriodWithShiftRows(dateFrom, dateTo);
     }
 }

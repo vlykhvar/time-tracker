@@ -5,12 +5,8 @@ import com.svbd.svbd.entity.Employee;
 import com.svbd.svbd.entity.Salary;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.svbd.svbd.util.DateTimeUtil.formatDateForShowing;
-import static com.svbd.svbd.util.DateTimeUtil.parseLocalDate;
 
 public final class SalaryConverter {
 
@@ -21,8 +17,8 @@ public final class SalaryConverter {
         var salaryBO = new SalaryBO();
         salaryBO.setId(salary.getSalaryId());
         salaryBO.setAnHour(salary.getAnHour());
-        salaryBO.setStartDate(formatDateForShowing(salary.getDateFrom()));
-        salaryBO.setEndDate(formatDateForShowing(salary.getDateTo()));
+        salaryBO.setStartDate(salary.getDateFrom());
+        salaryBO.setEndDate(salary.getDateTo());
         return salaryBO;
     }
 
@@ -37,8 +33,8 @@ public final class SalaryConverter {
         salary.setSalaryId(salaryBO.getId());
         salary.setEmployee(new Employee(salaryBO.getEmployeeId()));
         salary.setAnHour(salaryBO.getAnHour());
-        salary.setDateFrom(parseLocalDate(salaryBO.getStartDate()));
-        salary.setDateTo(parseLocalDate(salaryBO.getEndDate()));
+        salary.setDateFrom(salaryBO.getStartDate());
+        salary.setDateTo(salaryBO.getEndDate());
         return salary;
     }
 

@@ -5,6 +5,7 @@ import com.svbd.svbd.repository.employee.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -17,7 +18,6 @@ public class EmployeeService {
     }
 
     public Long createEmployee(Employee employee) {
-        // Метод save вернет сохраненную сущность с ID
         return repository.save(employee).getEmployeeId();
     }
 
@@ -27,6 +27,10 @@ public class EmployeeService {
             employee.setRemovedAt(LocalDate.now());
             repository.save(employee);
         });
+    }
+
+    public List<Employee> findAllByIds(Collection<Long> employeeIds) {
+        return repository.findAllById(employeeIds);
     }
 
     public List<Employee> findAllActiveEmployee() {

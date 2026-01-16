@@ -1,42 +1,31 @@
 package com.svbd.svbd.repository.settings;
 
 import com.svbd.svbd.entity.CompanySettings;
-import com.svbd.svbd.settings.HibernateModule;
-import org.hibernate.HibernateException;
-import org.springframework.stereotype.Component;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Component
-public class CompanySettingsRepository {
+@Repository
+public interface CompanySettingsRepository extends JpaRepository<CompanySettings, Long> {
 
-       public String getCompanyName() {
-              var session = HibernateModule.getSessionFactory().openSession();
-              var query = session.createQuery("SELECT cs.companyName FROM CompanySettings cs", String.class);
-              return query.getSingleResultOrNull();
-       }
+    @Query("SELECT cs.companyName FROM CompanySettings cs")
+    String getCompanyName();
 
-       public Optional<CompanySettings> getCompanySettings() {
-              var session = HibernateModule.getSessionFactory().openSession();
-              var query = session.createQuery("FROM CompanySettings cs", CompanySettings.class);
-              query.setFirstResult(0);
-              query.setMaxResults(1);
-              var companySettings = (CompanySettings) query.getResultStream().findFirst().orElseGet(() -> null);
-              session.close();
-              return Optional.ofNullable(companySettings);
-       }
+    // Since there should only be one CompanySettings entry, we can fetch the first one.
+    // JpaRepository's findFirst() or findTop() methods are suitable for this.
+    // Alternatively, if you expect exactly one, you could use findById(1L) assuming ID is 1.
+    // For this example, we'll use findFirst() which returns an Optional.
+    Optional<CompanySettings> findFirstBy();
 
-       public void saveCompanySettings(CompanySettings companySettings) {
-              var session = HibernateModule.getSessionFactory().openSession();
-              var transaction = session.beginTransaction();
-              try {
-                     session.saveOrUpdate(companySettings);
-                     transaction.commit();
-                     session.close();
-              } catch (HibernateException e) {
-                     transaction.rollback();
-                     session.close();
-                     throw new HibernateException(e);
-              }
-       }
+    // If you want to explicitly name a method for saving, you can do so,
+    // but JpaRepository already provides save(entity) for both new and existing entities.
+    // For example, if you wanted a method specifically for updating:
+    // @Modifying
+    // @Query("UPDATE CompanySettings cs SET cs.companyName = :companyName WHERE cs.id = :id")
+    // void updateCompanyName(@Param("companyName") String companyName, @Param("id") Long id);
+
+    // The saveCompanySettings method is replaced by JpaRepository's save method.
+    // public void saveCompanySettings(CompanySettings companySettings) { ... }
 }

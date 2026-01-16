@@ -35,7 +35,7 @@ public final class EmployeeConverter {
 
     public static EmployeeShortBO toEmployeeShortBO(EmployeeShortProjection projection) {
         var employeeShortBO = new EmployeeShortBO();
-        employeeShortBO.setId(projection.getId());
+        employeeShortBO.setId(projection.getEmployeeId());
         employeeShortBO.setName(projection.getName());
         return employeeShortBO;
     }

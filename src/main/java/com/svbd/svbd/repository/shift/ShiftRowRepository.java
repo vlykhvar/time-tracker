@@ -1,70 +1,65 @@
 package com.svbd.svbd.repository.shift;
 
 import com.svbd.svbd.entity.ShiftRow;
-import com.svbd.svbd.repository.CustomProjectionResultTransformer;
 import com.svbd.svbd.repository.projection.EmployShiftSalaryProjection;
-import com.svbd.svbd.settings.HibernateModule;
-import org.hibernate.HibernateException;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-public class ShiftRowRepository {
+/**
+ * Spring Data JPA repository for the ShiftRow entity.
+ * Spring will automatically provide an implementation for this interface.
+ */
+@Repository
+public interface ShiftRowRepository extends JpaRepository<ShiftRow, Long> {
 
-    public void createShiftRows(Collection<ShiftRow> shiftRows) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var transaction = session.beginTransaction();
-        try {
-            shiftRows.forEach(session::save);
-            transaction.commit();
-            session.close();
-        } catch (HibernateException e) {
-            transaction.rollback();
-            session.close();
-            throw new HibernateException(e);
-        }
-    }
+    /**
+     * Finds all shift rows for a specific date.
+     * This is a derived query method; Spring Data generates the query from the method name.
+     */
+    @Query("FROM ShiftRow sr WHERE sr.shift.shiftDate = :date")
+    Set<ShiftRow> findAllByShiftDate(LocalDate date);
 
-    public Set<ShiftRow> findAllByShiftDate(LocalDate date) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createQuery("SELECT sr FROM ShiftRow sr LEFT JOIN sr.shift s WHERE s.id = :date", ShiftRow.class);
-        query.setParameter("date", date);
-        var result = query.getResultStream().collect(Collectors.toSet());
-        session.close();
-        return result;
-    }
+    /**
+     * Deletes shift rows by a collection of their IDs.
+     * The @Modifying annotation is required for queries that change data.
+     * The @Transactional annotation ensures the operation is performed within a transaction.
+     */
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM ShiftRow sr WHERE sr.id IN :shiftRowIds")
+    void deleteByIds(@Param("shiftRowIds") Collection<Long> shiftRowIds);
 
-    public void removeByIds(Collection<Long> shiftRowIds) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var transaction = session.beginTransaction();
-        var query = session.createMutationQuery("DELETE FROM ShiftRow sr WHERE sr.id IN :shiftRowIds");
-        query.setParameterList("shiftRowIds", shiftRowIds);
-        query.executeUpdate();
-        transaction.commit();
-        session.close();
-    }
-
-    public List<EmployShiftSalaryProjection> getEmployeeShiftRowsWithSalaryForPeriod(LocalDate from, LocalDate to) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createNativeQuery(
-                """
-                      SELECT e.employee_id as employeeId, e.name as name, sr.shift_date as shiftDate,
-                      coalesce((s.AN_HOUR * (sr.TOTAL_TIME + sh.BONUS_TIME)), 0) as salary
-                      FROM shift_row sr INNER JOIN employee e on e.EMPLOYEE_ID = sr.EMPLOYEE_ID 
-                      LEFT JOIN salary s on e.EMPLOYEE_ID = s.EMPLOYEE_ID AND (s.date_from <= sr.SHIFT_DATE) 
-                      AND (s.date_to IS NULL OR s.date_to >= sr.shift_date)
-                      LEFT JOIN shift sh on sh.SHIFT_DATE = sr.SHIFT_DATE 
-                      WHERE sr.SHIFT_DATE >= :from AND sr.shift_date <= :to 
-                        """);
-        query.setParameter("from", from);
-        query.setParameter("to", to);
-        var result = query.unwrap(org.hibernate.query.NativeQuery.class)
-                .setResultTransformer(new CustomProjectionResultTransformer())
-                .getResultList();
-        session.close();
-        return result;
-    }
+    /**
+     * Retrieves a projection of employee shift and salary data for a given period.
+     * Spring Data will automatically map the native query results to the EmployShiftSalaryProjection record.
+     */
+    @Query(nativeQuery = true, value = """
+                     SELECT
+            e.employee_id as employeeId,
+            e.name as name,
+            sr.shift_date as shiftDate,
+            COALESCE(
+                    CASE
+                            WHEN sr.TOTAL_TIME > 0 THEN (s.AN_HOUR * (sr.TOTAL_TIME + sh.BONUS_TIME))
+            ELSE 0
+            END, 0
+                    ) as salary
+            FROM shift_row sr
+            INNER JOIN employee e on e.EMPLOYEE_ID = sr.EMPLOYEE_ID
+            LEFT JOIN salary s on e.EMPLOYEE_ID = s.EMPLOYEE_ID
+            AND (s.date_from <= sr.SHIFT_DATE)
+            AND (s.date_to IS NULL OR s.date_to >= sr.shift_date)
+            LEFT JOIN shift sh on sh.SHIFT_DATE = sr.SHIFT_DATE
+            WHERE sr.SHIFT_DATE >= :from AND sr.shift_date <= :to
+            """)
+    List<EmployShiftSalaryProjection> findEmployeeShiftSalariesForPeriod(@Param("from") LocalDate from, @Param("to") LocalDate to);
 }

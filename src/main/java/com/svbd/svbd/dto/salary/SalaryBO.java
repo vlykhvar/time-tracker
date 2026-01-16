@@ -1,5 +1,6 @@
 package com.svbd.svbd.dto.salary;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 public class SalaryBO {
@@ -7,8 +8,8 @@ public class SalaryBO {
     private Long id;
     private Long employeeId;
     private Long anHour;
-    private String startDate;
-    private String endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public Long getId() {
         return id;
@@ -26,19 +27,19 @@ public class SalaryBO {
         this.anHour = anHour;
     }
 
-    public String getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(String startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public String getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(String endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

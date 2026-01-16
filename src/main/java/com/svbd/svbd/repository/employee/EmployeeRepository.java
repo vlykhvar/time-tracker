@@ -17,13 +17,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e WHERE e.removedAt IS NULL ORDER BY e.name ASC")
     List<Employee> findAllRemovedAtIsNull();
 
-    @Query("SELECT new com.svbd.svbd.repository.projection.EmployeeShortProjection(e.id, e.name) " +
-           "FROM Employee e WHERE e.removedAt IS NULL")
+    @Query("SELECT e.employeeId as employeeId, e.name as name FROM Employee e WHERE e.removedAt IS NULL")
     List<EmployeeShortProjection> findAllEmployeeIdAndName();
 
-    @Query("SELECT new com.svbd.svbd.repository.projection.EmployeeShortProjection(e.id, e.name) " +
-           "FROM Employee e WHERE e.id NOT IN :excludeIds AND e.removedAt IS NULL")
+    @Query("SELECT e.employeeId as employeeId, e.name as name " +
+           "FROM Employee e WHERE e.employeeId NOT IN :excludeIds AND e.removedAt IS NULL")
     Set<EmployeeShortProjection> findAllIdNotIn(@Param("excludeIds") Collection<Long> excludeIds);
-
-    // Методы save(), findById(), deleteById() и другие уже есть в JpaRepository
 }

@@ -21,6 +21,8 @@ module com.svbd.svbd {
     requires spring.data.jpa;
     requires spring.data.commons;
     requires jakarta.annotation;
+    requires org.apache.logging.log4j;
+    requires spring.tx;
 
     opens com.svbd.svbd to javafx.fxml, javafx.graphics, spring.core, spring.beans, spring.context;
     opens com.svbd.svbd.controller to javafx.fxml, spring.core, spring.beans, spring.context, javafx.base;

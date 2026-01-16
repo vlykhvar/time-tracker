@@ -2,54 +2,39 @@ package com.svbd.svbd.repository.salary;
 
 import com.svbd.svbd.entity.Salary;
 import com.svbd.svbd.repository.projection.SalaryEmployeeProjection;
-import com.svbd.svbd.settings.HibernateModule;
-import org.hibernate.HibernateException;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-public class SalaryRepository {
+/**
+ * Spring Data JPA репозиторий для сущности Salary.
+ * Spring автоматически предоставит реализацию этого интерфейса.
+ */
+@Repository
+public interface SalaryRepository extends JpaRepository<Salary, Long> {
 
-    public Long createSalary(Salary salary) throws HibernateException {
-        Long id;
-        var session = HibernateModule.getSessionFactory().openSession();
-        var transaction = session.beginTransaction();
-        try {
-            id = (Long) session.save(salary);
-            transaction.commit();
-            session.close();
-            return id;
-        } catch (HibernateException e) {
-            transaction.rollback();
-            session.close();
-            throw new HibernateException(e);
-        }
-    }
+    /**
+     * Находит актуальную почасовую ставку для списка сотрудников на указанную дату.
+     */
+    @Query("SELECT e.employeeId, s.anHour " +
+           "FROM Salary s JOIN s.employee e WHERE e.employeeId IN :employeeIds " +
+           "AND (:date >= s.dateFrom AND (s.dateTo IS NULL OR :date <= s.dateTo))")
+    List<SalaryEmployeeProjection> findAllSalariesForEmployeesOnDate(
+            @Param("employeeIds") Collection<Long> employeeIds,
+            @Param("date") LocalDate date);
 
-    public List<SalaryEmployeeProjection> findAllByEmployeeIdsAndStartDateEndDateBetweenDate(
-            Collection<Long> employeeIds,
-            LocalDate date) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var query = session.createQuery(
-                "SELECT new com.svbd.svbd.repository.projection.SalaryEmployeeProjection(e.id, s.anHour) " +
-                        "FROM Salary s JOIN s.employee e WHERE e.id IN :employeeIds " +
-                        "AND (:date >= s.dateFrom AND (s.dateTo IS NULL OR :date <= s.dateTo))",
-                SalaryEmployeeProjection.class);
-        query.setParameter("date", date);
-        query.setParameterList("employeeIds", employeeIds);
-        var result = query.getResultList();
-        session.close();
-        return result;
-    }
-
-    public void removeSalariesByIds(Collection<Long> salaryIds) {
-        var session = HibernateModule.getSessionFactory().openSession();
-        var transaction = session.beginTransaction();
-        var query = session.createQuery("DELETE FROM Salary s WHERE s.id IN :salaryIds");
-        query.setParameterList("salaryIds", salaryIds);
-        query.executeUpdate();
-        transaction.commit();
-        session.close();
-    }
+    /**
+     * Удаляет записи о зарплате по списку их ID.
+     */
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Salary s WHERE s.salaryId IN :salaryIds")
+    void deleteByIds(@Param("salaryIds") Collection<Long> salaryIds);
 }

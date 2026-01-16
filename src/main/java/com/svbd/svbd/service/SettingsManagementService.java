@@ -33,28 +33,28 @@ public class SettingsManagementService {
 
     public CompanySettingsBO getCompanySettings() {
         CompanySettings companySettings;
-        var companySettingsOptional = companySettingsRepository.getCompanySettings();
+        var companySettingsOptional = companySettingsRepository.findFirstBy();
         if (companySettingsOptional.isEmpty()) {
             companySettings = new CompanySettings();
             companySettings.setCompanyName("SVBD");
             companySettings.setPassword("1234");
-            companySettingsRepository.saveCompanySettings(companySettings);
+            companySettingsRepository.save(companySettings);
         } else {
-            companySettings = companySettingsOptional.get();
+            companySettings = companySettingsOptional.stream().findFirst().get();
         }
         return toCompanySettingsBO(companySettings);
     }
 
     public void saveCompanyName(String name) {
-        var companySettings = companySettingsRepository.getCompanySettings().get();
+        var companySettings = companySettingsRepository.findFirstBy().get();
         companySettings.setCompanyName(name);
-        companySettingsRepository.saveCompanySettings(companySettings);
+        companySettingsRepository.save(companySettings);
     }
 
     public void savePassword(String password) {
-        var companySettings = companySettingsRepository.getCompanySettings().get();
+        var companySettings = companySettingsRepository.findFirstBy().get();
         companySettings.setPassword(password);
-        companySettingsRepository.saveCompanySettings(companySettings);
+        companySettingsRepository.save(companySettings);
     }
 
     public List<DinnerSettingBO> getDinnerSettings() {
