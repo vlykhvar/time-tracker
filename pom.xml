@@ -206,7 +206,7 @@
                             <transformers>
                                 <transformer implementation=
                                                      "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.svbd.svbd.Main</mainClass>
+                                    <mainClass>com.svbd.svbd.Application</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

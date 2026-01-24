@@ -1,45 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.svbd.svbd.controller.customfield.*?>
+<?import com.svbd.svbd.controller.customfield.NumberField?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="576.0" prefWidth="728.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.SettingsController">
+<AnchorPane styleClass="main-container" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.SettingsController">
     <children>
         <TabPane fx:id="tabPane" prefHeight="576.0" prefWidth="728.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <tabs>
                 <Tab text="Працівники">
                     <content>
-                        <GridPane hgap="10" vgap="10">
-                            <children>
-                                <TableView fx:id="employeeTable" prefHeight="491.0" prefWidth="499.0" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.rowSpan="2">
-                                    <columns>
-                                        <TableColumn fx:id="employeeIdColumn" editable="false" prefWidth="75.0" text="ID" visible="false" />
-                                        <TableColumn fx:id="fullNameColumn" editable="false" prefWidth="191.20001220703125" text="ПІБ" />
-                                        <TableColumn fx:id="phoneNumberColumn" editable="false" minWidth="3.2000732421875" prefWidth="155.199951171875" text="Номер телефону" />
-                                        <TableColumn id="remove" fx:id="remove" editable="false" minWidth="0.0" prefWidth="152.800048828125" text="Видалити" />
-                                    </columns>
-                                </TableView>
-                                <VBox prefHeight="200.0" prefWidth="200.0" spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <SplitPane dividerPositions="0.35" style="-fx-background-color: transparent;">
+                            <items>
+                                <!-- Left Panel: Add Employee Form -->
+                                <VBox spacing="15.0" styleClass="left-panel" maxWidth="250.0">
+                                    <padding>
+                                        <Insets top="20" right="20" bottom="20" left="20" />
+                                    </padding>
                                     <children>
-                                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Додати нового співробітника" wrappingWidth="164.0" />
-                                        <TextField fx:id="fullName" alignment="CENTER" prefHeight="26.0" prefWidth="180.0" promptText="ПІБ" />
-                                        <NumberField fx:id="phoneNumber" alignment="CENTER" prefHeight="26.0" prefWidth="180.0" promptText="Номер телефону" />
-                                        <NumberField fx:id="perHour" alignment="CENTER" prefHeight="26.0" prefWidth="180.0" promptText="зп за годину" />
-                                        <Button id="newEmploeeButton" fx:id="createEmployeeButton" mnemonicParsing="false" onAction="#createEmployee" prefHeight="26.0" prefWidth="105.0" text="Створити" />
+                                        <Label text="Додати співробітника" styleClass="panel-title" />
+                                        <Separator />
+                                        <Label text="ПІБ:" />
+                                        <TextField fx:id="fullName" promptText="Повне ім'я" prefHeight="35.0" />
+                                        <Label text="Номер телефону:" />
+                                        <NumberField fx:id="phoneNumber" promptText="+380..." prefHeight="35.0" />
+                                        <Label text="Ставка за годину:" />
+                                        <NumberField fx:id="perHour" promptText="0" prefHeight="35.0" />
+                                        <Button fx:id="createEmployeeButton" mnemonicParsing="false" onAction="#createEmployee" text="Створити" styleClass="save-button" prefHeight="35.0" maxWidth="Infinity"/>
                                     </children>
                                 </VBox>
-                            </children>
-                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                     </columnConstraints>
-                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                     </rowConstraints>
-                        </GridPane>
+
+                                <!-- Right Panel: Employee Table -->
+                                <TableView fx:id="employeeTable" prefHeight="520.0" prefWidth="465.0">
+                                    <columns>
+                                        <TableColumn fx:id="employeeIdColumn" text="ID" visible="false" />
+                                        <TableColumn fx:id="fullNameColumn" text="ПІБ" prefWidth="180.0" />
+                                        <TableColumn fx:id="phoneNumberColumn" text="Номер телефону" prefWidth="150.0" />
+                                        <TableColumn fx:id="remove" text="Видалити" prefWidth="100.0" style="-fx-alignment: CENTER;"/>
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
+                                </TableView>
+                            </items>
+                        </SplitPane>
                     </content>
                 </Tab>
                 <Tab text="Харчування">

@@ -48,7 +48,7 @@ public class Shift {
     @Column(name = "daily_revenue")
     private Long dailyRevenue = 0L;
 
-    @OneToMany(mappedBy = "shift", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "shift", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShiftRow> shiftRows = new ArrayList<>();
 
     public Shift() {

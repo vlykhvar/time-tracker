@@ -16,6 +16,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -271,6 +272,11 @@ public class SettingsController implements Initializable {
                 return new TableCell<DinnerSettingBO, String>() {
                     final Button btn = new Button("Видалити");
 
+                    {
+                        btn.getStyleClass().addAll("button", "delete-button");
+                        setAlignment(Pos.CENTER);
+                    }
+
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -322,6 +328,11 @@ public class SettingsController implements Initializable {
             public TableCell call(final TableColumn<EmployeeWithLastSalaryBO, String> param) {
                 return new TableCell<EmployeeWithLastSalaryBO, String>() {
                     final Button btn = new Button("Видалити");
+
+                    {
+                        btn.getStyleClass().addAll("button", "delete-button");
+                        setAlignment(Pos.CENTER);
+                    }
 
                     @Override
                     public void updateItem(String item, boolean empty) {

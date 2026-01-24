@@ -1,12 +1,14 @@
 package com.svbd.svbd.controller;
 
-import com.svbd.svbd.dto.report.MainReport;
+import com.svbd.svbd.dto.report.ReportRequest;
+import com.svbd.svbd.enums.EReportType;
 import com.svbd.svbd.exception.StartDateAfterEndDateException;
 import com.svbd.svbd.service.ReportsService;
 import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.stage.Stage;
@@ -41,17 +43,21 @@ public class MainReportController implements Initializable {
     private Button makeReport;
 
     @FXML
-    void makeReport(ActionEvent event) throws IOException {
+    void makeReport(ActionEvent event) throws Exception {
         if (dateFrom.getValue().isAfter(dateTo.getValue())) {
             showAlert(START_DATE_AFTER_EXCEPTION);
             throw new StartDateAfterEndDateException();
         }
-        var request = new MainReport(dateFrom.getValue(), dateTo.getValue());
-        var patch = reportsService.generateMainRepost(request);
-        File excelFile = new File(patch);
-        hostServices.showDocument(excelFile.toURI().toURL().toExternalForm());
-        var s = (Stage) makeReport.getScene().getWindow();
-        s.close();
+        var request = new ReportRequest(dateFrom.getValue(), dateTo.getValue());
+        try {
+            var patch = reportsService.generateReport(EReportType.MONTHLY, request);
+            File excelFile = new File(patch);
+            hostServices.showDocument(excelFile.toURI().toURL().toExternalForm());
+            var s = (Stage) makeReport.getScene().getWindow();
+            s.close();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Exception", e.getMessage());
+        }
     }
 
     @Override

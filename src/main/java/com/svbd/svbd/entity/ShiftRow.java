@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "shift_row")
+@Table(name = "shift_row", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"shift_date", "EMPLOYEE_ID"})
+})
 public class ShiftRow {
 
     @Id
@@ -18,7 +20,7 @@ public class ShiftRow {
     private Shift shift;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id", referencedColumnName = "employee_id", nullable = false)
+    @JoinColumn(name = "EMPLOYEE_ID", referencedColumnName = "EMPLOYEE_ID", nullable = false)
     private Employee employee;
 
     @Column(name = "start_shift")

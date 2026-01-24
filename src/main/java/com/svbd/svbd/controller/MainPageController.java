@@ -1,10 +1,12 @@
 package com.svbd.svbd.controller;
 
 import com.svbd.svbd.controller.customfield.NumberField;
+import com.svbd.svbd.dto.report.ReportRequest;
 import com.svbd.svbd.dto.shift.ShiftBO;
 import com.svbd.svbd.dto.shift.ShiftRequestBO;
 import com.svbd.svbd.dto.shift.row.ShiftRowBO;
 import com.svbd.svbd.dto.shift.row.ShiftRowRequestBO;
+import com.svbd.svbd.enums.EReportType;
 import com.svbd.svbd.exception.IncorrectPasswordException;
 import com.svbd.svbd.service.EmployeeManagementService;
 import com.svbd.svbd.service.ReportsService;
@@ -177,7 +179,8 @@ public class MainPageController implements Initializable {
     void printOut() {
         try {
             saveShift();
-            var patch = reportsService.generateDailyReport(datePicker.getValue());
+            var request = new ReportRequest(datePicker.getValue(), datePicker.getValue());
+            var patch = reportsService.generateReport(EReportType.DAILY, request);
             File excelFile = new File(patch);
             hostServices.showDocument(excelFile.toURI().toURL().toExternalForm());
         } catch (Exception e) {

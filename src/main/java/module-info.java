@@ -53,4 +53,5 @@ module com.svbd.svbd {
     opens com.svbd.svbd.enums to javafx.fxml;
     exports com.svbd.svbd.service.impl;
     opens com.svbd.svbd.service.impl to spring.beans, spring.context, spring.core;
+    opens com.svbd.svbd.service.report.impl;
 }
