@@ -18,7 +18,7 @@ public class ShiftRow {
     private Shift shift;
 
     @ManyToOne
-    @JoinColumn(name = "EMPLOYEE_ID", referencedColumnName = "EMPLOYEE_ID", nullable = false)
+    @JoinColumn(name = "employee_id", referencedColumnName = "employee_id", nullable = false)
     private Employee employee;
 
     @Column(name = "start_shift")

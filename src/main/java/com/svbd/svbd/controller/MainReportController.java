@@ -3,7 +3,6 @@ package com.svbd.svbd.controller;
 import com.svbd.svbd.dto.report.MainReport;
 import com.svbd.svbd.exception.StartDateAfterEndDateException;
 import com.svbd.svbd.service.ReportsService;
-import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

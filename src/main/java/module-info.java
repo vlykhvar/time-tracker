@@ -51,4 +51,6 @@ module com.svbd.svbd {
     exports com.svbd.svbd.dto.employee;
 
     opens com.svbd.svbd.enums to javafx.fxml;
+    exports com.svbd.svbd.service.impl;
+    opens com.svbd.svbd.service.impl to spring.beans, spring.context, spring.core;
 }

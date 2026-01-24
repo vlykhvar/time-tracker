@@ -1,39 +1,12 @@
 package com.svbd.svbd.service;
 
 import com.svbd.svbd.entity.Employee;
-import com.svbd.svbd.repository.employee.EmployeeRepository;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-@Service
-public class EmployeeService {
-
-    private final EmployeeRepository repository;
-
-    public EmployeeService(EmployeeRepository repository) {
-        this.repository = repository;
-    }
-
-    public Long createEmployee(Employee employee) {
-        return repository.save(employee).getEmployeeId();
-    }
-
-    public void removeById(Long employeeId) {
-        // "Мягкое" удаление
-        repository.findById(employeeId).ifPresent(employee -> {
-            employee.setRemovedAt(LocalDate.now());
-            repository.save(employee);
-        });
-    }
-
-    public List<Employee> findAllByIds(Collection<Long> employeeIds) {
-        return repository.findAllById(employeeIds);
-    }
-
-    public List<Employee> findAllActiveEmployee() {
-        return repository.findAllRemovedAtIsNull();
-    }
+public interface EmployeeService {
+    Long createEmployee(Employee employee);
+    void removeById(Long employeeId);
+    List<Employee> findAllByIds(Collection<Long> employeeIds);
+    List<Employee> findAllActiveEmployee();
 }
