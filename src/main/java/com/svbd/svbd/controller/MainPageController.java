@@ -116,15 +116,6 @@ public class MainPageController implements Initializable {
     private NumberField cashOnMorning;
 
     @FXML
-    private NumberField cashKeyOnEvening;
-
-    @FXML
-    private NumberField cashKeyOnMorning;
-
-    @FXML
-    private NumberField cashKeyTotal;
-
-    @FXML
     private TextArea comments;
 
     @FXML
@@ -151,13 +142,13 @@ public class MainPageController implements Initializable {
             var shift = new ShiftRequestBO();
             shift.setDate(datePicker.valueProperty().get());
             shift.setTaxi(checkAndChangeStringToLong(taxi));
-            shift.setCashKeyOnEvening(checkAndChangeStringToLong(cashKeyOnEvening));
             shift.setComments(comments.getText());
-            shift.setCashKeyTotal(checkAndChangeStringToLong(cashKeyTotal));
-            shift.setCashKeyOnMorning(checkAndChangeStringToLong(cashKeyOnMorning));
             shift.setCashOnEvening(checkAndChangeStringToLong(cashOnEvening));
             shift.setCashOnMorning(checkAndChangeStringToLong(cashOnMorning));
             shift.setTotalCash(checkAndChangeStringToLong(totalCash));
+            shift.setCashKeyOnEvening(0L);
+            shift.setCashKeyOnMorning(0L);
+            shift.setCashKeyTotal(0L);
             shift.setBonusTime(checkAndChangeStringToLong(bonusTime));
             shift.setDailyRevenue(checkAndChangeStringToLong(dailyRevenue));
             var rows = new HashSet<ShiftRowRequestBO>();
@@ -331,11 +322,8 @@ public class MainPageController implements Initializable {
     private void prepareShiftDataToScene(ShiftBO shiftBO) {
         taxi.setText(adjustLong(shiftBO.getTaxi()));
         totalCash.setText(adjustLong(shiftBO.getTotalCash()));
-        cashOnMorning.setText(adjustLong(shiftBO.getCashOnMorning()));
         cashOnEvening.setText(adjustLong(shiftBO.getCashOnEvening()));
-        cashKeyOnEvening.setText(adjustLong(shiftBO.getCashKeyOnEvening()));
-        cashKeyTotal.setText(adjustLong(shiftBO.getCashKeyTotal()));
-        cashKeyOnMorning.setText(adjustLong(shiftBO.getCashKeyOnMorning()));
+        cashOnMorning.setText(adjustLong(shiftBO.getCashOnMorning()));
         comments.setText(shiftBO.getComments());
         bonusTime.setText(adjustLong(shiftBO.getBonusTime()));
         dailyRevenue.setText(adjustLong(shiftBO.getDailyRevenue()));

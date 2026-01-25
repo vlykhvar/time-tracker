@@ -21,10 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.svbd.svbd.enums.ColorRgb.*;
@@ -82,7 +81,9 @@ public class MainReportUnitImpl implements ReportingUnit {
 
         var currDir = new File(".");
         var path = currDir.getAbsolutePath();
-        var fileLocation = path.substring(0, path.length() - 1) + "temsp.xls";
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String fileName = String.format("%s monthly report from %s - %s .xls", timestamp, request.dateFrom(), request.dateTo());
+        var fileLocation = path.substring(0, path.length() - 1) + fileName;
         var outputStream = new FileOutputStream(fileLocation);
         try {
             workbook.write(outputStream);
@@ -333,19 +334,19 @@ public class MainReportUnitImpl implements ReportingUnit {
             cell.setCellValue(nonNull(currentShift) ? currentShift.getTotalCash() : 0);
             cells.add(cell);
             cell = keyCash.createCell(cellPosition);
-            cell.setCellValue(nonNull(currentShift) ? currentShift.getCashKeyTotal() : 0);
+            cell.setCellValue(nonNull(currentShift) && nonNull(currentShift.getCashKeyTotal()) ? currentShift.getCashKeyTotal() : 0);
             cells.add(cell);
             cell = dailyRevenue.createCell(cellPosition);
             cell.setCellValue(nonNull(currentShift) && nonNull(currentShift.getDailyRevenue()) ? currentShift.getDailyRevenue() : 0);
             cells.add(cell);
             cell = totalCash.createCell(cellPosition);
-            cell.setCellValue(nonNull(currentShift) ? currentShift.getCashKeyTotal() + currentShift.getTotalCash() + currentShift.getDailyRevenue() : 0);
+            cell.setCellValue(nonNull(currentShift) ? safeAdd(currentShift.getCashKeyTotal(), currentShift.getTotalCash(), currentShift.getDailyRevenue()) : 0);
             cells.add(cell);
             cell = totalDinner.createCell(cellPosition);
             cell.setCellValue(nonNull(currentShift) ? currentShift.getTotalDinner() : 0);
             cells.add(cell);
-            cells.forEach(cellForStyles -> cellForStyles.setCellStyle(
-                    prepareCellStyle(workbook, BRIGHT_YELLOW, 11, false, THIN)));
+            var style = prepareCellStyle(workbook, BRIGHT_YELLOW, 11, false, THIN);
+            cells.forEach(cellForStyles -> cellForStyles.setCellStyle(style));
             if (currentDateForRow.getDayOfMonth() == 15) {
                 LocalDate finalCurrentDateForRow = currentDateForRow;
                 var shiftInCurrentPeriods = shifts.stream()
@@ -358,38 +359,24 @@ public class MainReportUnitImpl implements ReportingUnit {
                         .collect(Collectors.toSet());
                 cellPosition++;
                 cells.clear();
-                cell = rowTaxi.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getTaxi)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = shiftCash.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getTotalCash)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = keyCash.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getCashKeyTotal)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = dailyRevenue.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getDailyRevenue)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = totalCash.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal() + shift.getDailyRevenue())
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = totalDinner.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getTotalDinner)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cells.forEach(cellForStyles -> cellForStyles.setCellStyle(
-                        prepareCellStyle(workbook, VERY_SOFT_MAGENTA, 11, true, MEDIUM)));
+                long sumTaxi = 0, sumTotalCash = 0, sumKeyCash = 0, sumRevenue = 0, sumDinner = 0;
+                for (Shift shift : shiftInCurrentPeriods) {
+                    if (shift == null) continue;
+
+                    sumTaxi += (shift.getTaxi() != null ? shift.getTaxi() : 0L);
+                    sumTotalCash += (shift.getTotalCash() != null ? shift.getTotalCash() : 0L);
+                    sumKeyCash += (shift.getCashKeyTotal() != null ? shift.getCashKeyTotal() : 0L);
+                    sumRevenue += (shift.getDailyRevenue() != null ? shift.getDailyRevenue() : 0L);
+                    sumDinner += (shift.getTotalDinner() != null ? shift.getTotalDinner() : 0L);
+                }
+                addCell(rowTaxi, cellPosition, sumTaxi, cells);
+                addCell(shiftCash, cellPosition, sumTotalCash, cells);
+                addCell(keyCash, cellPosition, sumKeyCash, cells);
+                addCell(dailyRevenue, cellPosition, sumRevenue, cells);
+                addCell(totalCash, cellPosition, sumTotalCash + sumKeyCash + sumRevenue, cells); // Итоговая сумма
+                addCell(totalDinner, cellPosition, sumDinner, cells);
+                var styleV2 = prepareCellStyle(workbook, VERY_SOFT_MAGENTA, 11, true, MEDIUM);
+                cells.forEach(cellForStyles -> cellForStyles.setCellStyle(styleV2));
             } else if (currentDateForRow.isEqual(currentDateForRow.withDayOfMonth(
                     currentDateForRow.getMonth().length(currentDateForRow.isLeapYear())))) {
                 LocalDate finalCurrentDateForRow = currentDateForRow;
@@ -402,79 +389,59 @@ public class MainReportUnitImpl implements ReportingUnit {
                         .collect(Collectors.toSet());
                 cellPosition++;
                 cells.clear();
-                cell = rowTaxi.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getTaxi)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = shiftCash.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getTotalCash)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = keyCash.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getCashKeyTotal)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = dailyRevenue.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getDailyRevenue)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = totalCash.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal() + shift.getDailyRevenue())
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = totalDinner.createCell(cellPosition);
-                cell.setCellValue(shiftInCurrentPeriods.stream()
-                        .map(Shift::getTotalDinner)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
+                long sumTaxi = 0, sumTotalCash = 0, sumKeyCash = 0, sumRevenue = 0, sumDinner = 0;
+                for (Shift shift : shiftInCurrentPeriods) {
+                    if (shift == null) continue;
+
+                    sumTaxi += (shift.getTaxi() != null ? shift.getTaxi() : 0L);
+                    sumTotalCash += (shift.getTotalCash() != null ? shift.getTotalCash() : 0L);
+                    sumKeyCash += (shift.getCashKeyTotal() != null ? shift.getCashKeyTotal() : 0L);
+                    sumRevenue += (shift.getDailyRevenue() != null ? shift.getDailyRevenue() : 0L);
+                    sumDinner += (shift.getTotalDinner() != null ? shift.getTotalDinner() : 0L);
+                }
+                addCell(rowTaxi, cellPosition, sumTaxi, cells);
+                addCell(shiftCash, cellPosition, sumTotalCash, cells);
+                addCell(keyCash, cellPosition, sumKeyCash, cells);
+                addCell(dailyRevenue, cellPosition, sumRevenue, cells);
+                addCell(totalCash, cellPosition, sumTotalCash + sumKeyCash + sumRevenue, cells); // Итоговая сумма
+                addCell(totalDinner, cellPosition, sumDinner, cells);
                 var shiftsInCurrentMonth = shifts.stream()
                         .filter(employeeShift ->
                                 employeeShift.getShiftDate().getMonth().equals(finalCurrentDateForRow.getMonth()))
                         .collect(Collectors.toSet());
                 cellPosition++;
-                cell = rowTaxi.createCell(cellPosition);
-                cell.setCellValue(shiftsInCurrentMonth.stream()
-                        .map(Shift::getTaxi)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = shiftCash.createCell(cellPosition);
-                cell.setCellValue(shiftsInCurrentMonth.stream()
-                        .map(Shift::getTotalCash)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = keyCash.createCell(cellPosition);
-                cell.setCellValue(shiftsInCurrentMonth.stream()
-                        .map(Shift::getCashKeyTotal)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = dailyRevenue.createCell(cellPosition);
-                cell.setCellValue(shiftsInCurrentMonth.stream()
-                        .map(Shift::getDailyRevenue)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = totalCash.createCell(cellPosition);
-                cell.setCellValue(shiftsInCurrentMonth.stream()
-                        .map(shift -> shift.getTotalCash() + shift.getCashKeyTotal() + shift.getDailyRevenue())
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cell = totalDinner.createCell(cellPosition);
-                cell.setCellValue(shiftsInCurrentMonth.stream()
-                        .map(Shift::getTotalDinner)
-                        .reduce(0L, Long::sum));
-                cells.add(cell);
-                cells.forEach(cellForStyles -> cellForStyles.setCellStyle(
-                        prepareCellStyle(workbook, VERY_SOFT_MAGENTA, 11, true, MEDIUM)));
+                sumTaxi = 0;
+                sumTotalCash = 0;
+                sumKeyCash = 0;
+                sumRevenue = 0;
+                sumDinner = 0;
+                for (Shift shift : shiftsInCurrentMonth) {
+                    if (shift == null) continue;
+
+                    sumTaxi += (shift.getTaxi() != null ? shift.getTaxi() : 0L);
+                    sumTotalCash += (shift.getTotalCash() != null ? shift.getTotalCash() : 0L);
+                    sumKeyCash += (shift.getCashKeyTotal() != null ? shift.getCashKeyTotal() : 0L);
+                    sumRevenue += (shift.getDailyRevenue() != null ? shift.getDailyRevenue() : 0L);
+                    sumDinner += (shift.getTotalDinner() != null ? shift.getTotalDinner() : 0L);
+                }
+                addCell(rowTaxi, cellPosition, sumTaxi, cells);
+                addCell(shiftCash, cellPosition, sumTotalCash, cells);
+                addCell(keyCash, cellPosition, sumKeyCash, cells);
+                addCell(dailyRevenue, cellPosition, sumRevenue, cells);
+                addCell(totalCash, cellPosition, sumTotalCash + sumKeyCash + sumRevenue, cells); // Итоговая сумма
+                addCell(totalDinner, cellPosition, sumDinner, cells);
+                var styleV2 = prepareCellStyle(workbook, VERY_SOFT_MAGENTA, 11, true, MEDIUM);
+                cells.forEach(cellForStyles -> cellForStyles.setCellStyle(styleV2));
             }
 
             cellPosition++;
             currentDateForRow = currentDateForRow.plusDays(1);
         }
 
+    }
+
+    private static long safeAdd(Long... args) {
+        return Arrays.stream(args).filter(Objects::nonNull).mapToLong(Long::longValue).sum();
     }
 
     private Long getSalaryForDate(Map<LocalDate, EmployShiftSalaryProjection> employeeShiftByDate, LocalDate date) {
@@ -499,5 +466,11 @@ public class MainReportUnitImpl implements ReportingUnit {
         cellStyle.setBorderLeft(borderStyle);
         cellStyle.setBorderRight(borderStyle);
         return cellStyle;
+    }
+
+    private void addCell(Row row, int position, long value, Collection<Cell> cells) {
+        Cell cell = row.createCell(position);
+        cell.setCellValue(value);
+        cells.add(cell);
     }
 }

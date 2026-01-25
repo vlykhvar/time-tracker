@@ -1,109 +1,121 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
-  Copyright (c) 2015, 2019, Gluon and/or its affiliates.
-  All rights reserved. Use is subject to license terms.
-
-  This file is available and licensed under the following license:
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-
-  - Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-  - Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the distribution.
-  - Neither the name of Oracle Corporation nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--->
-
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.VBox?>
-
 <?import com.svbd.svbd.controller.customfield.NumberField?>
-<VBox prefHeight="526.0" prefWidth="787.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.MainPageController">
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
+<AnchorPane fx:id="anchorPane" prefHeight="650.0" prefWidth="1100.0" styleClass="main-container" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.svbd.svbd.controller.MainPageController">
     <children>
-        <MenuBar prefHeight="26.0" prefWidth="808.0" VBox.vgrow="NEVER">
-            <menus>
-                <Menu fx:id="management" mnemonicParsing="false" onAction="#validateUser" text="Управління">
-                    <items>
-                        <MenuItem fx:id="settings" mnemonicParsing="false" onAction="#showSettings" text="Налаштування" />
-                        <Menu mnemonicParsing="false" onAction="#validateUser" text="Звіти">
+        <BorderPane AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.bottomAnchor="0.0">
+            <top>
+                <MenuBar BorderPane.alignment="CENTER">
+                    <menus>
+                        <Menu mnemonicParsing="false" text="Файл">
                             <items>
-                                <MenuItem fx:id="mainReport" mnemonicParsing="false" onAction="#showReportScene" text="Управлінська звітність" />
+                                <MenuItem fx:id="about" mnemonicParsing="false" onAction="#openAbout" text="Про програму" />
                             </items>
                         </Menu>
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Допомога">
-                    <items>
-                        <MenuItem fx:id="about" mnemonicParsing="false" onAction="#openAbout" text="Про" />
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
-        <AnchorPane fx:id="anchorPane" minHeight="-Infinity" prefHeight="543.0" prefWidth="787.0" VBox.vgrow="ALWAYS">
-            <children>
-                <TableView fx:id="shiftEmployeeData" editable="true" layoutX="271.0" layoutY="53.0" prefHeight="378.0" prefWidth="489.0">
-                    <columns>
-                        <TableColumn fx:id="employeeName" prefWidth="200" resizable="false" text="Працівник" />
-                        <TableColumn fx:id="startEmployeeShift" minWidth="0.0" prefWidth="95" resizable="false" sortable="false" text="Початок" />
-                        <TableColumn fx:id="endEmployeeShift" minWidth="8.0" prefWidth="95" resizable="false" sortable="false" text="Кінець" />
-                        <TableColumn fx:id="totalWorkTime" minWidth="8.0" prefWidth="95" resizable="false" sortable="false" text="Робочих годин" />
-                        <TableColumn fx:id="employeeId" editable="false" minWidth="8.0" prefWidth="190.4000244140625" resizable="false" sortable="false" text="employeeId" visible="false" />
-                        <TableColumn fx:id="shiftRowId" editable="false" minWidth="8.0" prefWidth="190.4000244140625" resizable="false" sortable="false" text="shiftRowId" visible="false" />
-                    </columns>
-                </TableView>
-                <Label layoutX="271.0" layoutY="16.0" prefHeight="18.0" prefWidth="61.0" text="Дата зміни" AnchorPane.topAnchor="16.0" />
-                <Label layoutX="21.0" layoutY="29.0" prefHeight="18.0" prefWidth="98.0" text="Каса на ранок" />
-                <Label layoutX="20.0" layoutY="56.0" prefHeight="18.0" prefWidth="79.0" text="Каса прокату" />
-                <Label layoutX="20.0" layoutY="82.0" prefHeight="18.0" prefWidth="79.0" text="Каса на вечір" />
-                <Label layoutX="20.0" layoutY="111.0" prefHeight="18.0" prefWidth="98.0" text="Каса ключі ранок" />
-                <Label layoutX="20.0" layoutY="138.0" prefHeight="18.0" prefWidth="79.0" text="Каса ключі " />
-                <Label layoutX="20.0" layoutY="164.0" prefHeight="18.0" prefWidth="120.0" text="Каса ключі вечір" />
-                <Label layoutX="546.0" layoutY="16.0" prefHeight="18.4" prefWidth="79.2" text="Бонус години:" />
-                <Label fx:id="textDailyRevenue" layoutX="20.0" layoutY="188.0" prefHeight="18.0" prefWidth="120.0" text="Каса магазину" />
-                <Label layoutX="20.0" layoutY="239.0" prefHeight="18.0" prefWidth="67.0" text="Таксі" />
-                <NumberField fx:id="cashOnMorning" editable="false" layoutX="128.0" layoutY="26.0" prefHeight="26.0" prefWidth="106.0" text="0" />
-                <NumberField fx:id="totalCash" layoutX="128.0" layoutY="53.0" prefHeight="26.0" prefWidth="106.0" text="0" />
-                <NumberField fx:id="cashOnEvening" layoutX="128.0" layoutY="79.0" prefHeight="26.0" prefWidth="106.0" text="0" />
-                <NumberField fx:id="cashKeyOnMorning" editable="false" layoutX="128.0" layoutY="108.0" prefHeight="26.0" prefWidth="106.0" text="0" />
-                <NumberField fx:id="cashKeyTotal" layoutX="128.0" layoutY="135.0" prefHeight="26.0" prefWidth="106.0" text="0" />
-                <NumberField fx:id="cashKeyOnEvening" layoutX="128.0" layoutY="161.0" prefHeight="26.0" prefWidth="106.0" text="0" />
-                <NumberField fx:id="taxi" layoutX="128.0" layoutY="235.0" prefHeight="26.0" prefWidth="106.0" text="0" />
-                <NumberField fx:id="dailyRevenue" layoutX="128.0" layoutY="185.0" prefHeight="26.0" prefWidth="106.0" text="0"/>
-                <NumberField fx:id="bonusTime" layoutX="636.0" layoutY="12.0" prefHeight="26.4" prefWidth="67.2" text="0" AnchorPane.topAnchor="12.0" />
-                <Button fx:id="printOut" layoutX="622.0" layoutY="496.0" mnemonicParsing="false" onAction="#printOut" prefHeight="26.0" prefWidth="138.0" text="Сформувати звіт" />
-                <Button fx:id="saveButton" layoutX="622.0" layoutY="455.0" mnemonicParsing="false" onAction="#saveShift" prefHeight="26.0" prefWidth="138.0" text="Зберегти" />
-                <TextArea fx:id="comments" layoutX="21.0" layoutY="305.0" prefHeight="127.0F" prefWidth="218.0" promptText="Коментарі до зміни" wrapText="true" />
-                <DatePicker fx:id="datePicker" layoutX="333.0" layoutY="12.0" AnchorPane.topAnchor="12.0" />
-            </children>
-        </AnchorPane>
+                        <Menu fx:id="management" mnemonicParsing="false" onAction="#validateUser" text="Управління">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#showSettings" text="Налаштування" />
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" onAction="#validateUser" text="Звіти">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#showReportScene" text="Місячний звіт" />
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+            </top>
+            <center>
+                <HBox spacing="20.0" BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets top="20.0" right="20.0" bottom="20.0" left="20.0" />
+                    </padding>
+                    <children>
+                        <!-- Left Panel: Cash & Inputs -->
+                        <VBox styleClass="left-panel" spacing="12.0" prefWidth="280.0" minWidth="280.0">
+                            <padding>
+                                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0" />
+                            </padding>
+                            <children>
+                                <VBox spacing="5.0">
+                                    <Label text="Каса на ранок:" />
+                                    <NumberField fx:id="cashOnMorning" prefHeight="35.0" maxWidth="Infinity" editable="false" />
+                                </VBox>
+
+                                <VBox spacing="5.0">
+                                    <Label text="Каса прокату:" />
+                                    <NumberField fx:id="totalCash" prefHeight="35.0" maxWidth="Infinity" />
+                                </VBox>
+
+                                <VBox spacing="5.0">
+                                    <Label text="Каса на вечір:" />
+                                    <NumberField fx:id="cashOnEvening" prefHeight="35.0" maxWidth="Infinity" />
+                                </VBox>
+
+                                <Separator />
+                                <VBox spacing="5.0">
+                                    <Label text="Каса магазину:" />
+                                    <NumberField fx:id="dailyRevenue" prefHeight="35.0" maxWidth="Infinity" />
+                                </VBox>
+
+                                <Separator />
+
+                                <VBox spacing="5.0">
+                                    <Label text="Таксі:" />
+                                    <NumberField fx:id="taxi" prefHeight="35.0" maxWidth="Infinity" />
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Right Panel: Table & Comments -->
+                        <VBox HBox.hgrow="ALWAYS" spacing="15.0">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                        <Label text="Дата зміни:" style="-fx-font-weight: bold; -fx-text-fill: -fx-accent-color;" />
+                                        <DatePicker fx:id="datePicker" prefHeight="35.0" prefWidth="180.0" />
+                                    </HBox>
+
+                                    <Region HBox.hgrow="ALWAYS" /> <!-- Spacer -->
+
+                                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                        <Label text="Бонус години:" style="-fx-font-weight: bold; -fx-text-fill: -fx-accent-color;" />
+                                        <NumberField fx:id="bonusTime" prefHeight="35.0" prefWidth="100.0" />
+                                    </HBox>
+                                </HBox>
+
+                                <TableView fx:id="shiftEmployeeData" editable="true" VBox.vgrow="ALWAYS" styleClass="table-view">
+                                    <columns>
+                                        <TableColumn fx:id="shiftRowId" text="ID" visible="false" />
+                                        <TableColumn fx:id="employeeId" text="EmpID" visible="false" />
+                                        <TableColumn fx:id="employeeName" text="Співробітник" prefWidth="200.0" />
+                                        <TableColumn fx:id="startEmployeeShift" text="Початок" prefWidth="100.0" style="-fx-alignment: CENTER;" />
+                                        <TableColumn fx:id="endEmployeeShift" text="Кінець" prefWidth="100.0" style="-fx-alignment: CENTER;" />
+                                        <TableColumn fx:id="totalWorkTime" text="Робочих годин" prefWidth="120.0" style="-fx-alignment: CENTER;" />
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
+                                </TableView>
+
+                                <VBox spacing="5.0">
+                                    <Label text="Коментарі:" />
+                                    <TextArea fx:id="comments" promptText="Коментарі до зміни..." prefHeight="100.0" wrapText="true" styleClass="text-area" />
+                                </VBox>
+
+                                <HBox alignment="BOTTOM_RIGHT" spacing="15.0">
+                                    <Button mnemonicParsing="false" onAction="#printOut" text="Сформувати звіт" styleClass="action-button" prefHeight="35.0" prefWidth="150.0" />
+                                    <Button fx:id="save" mnemonicParsing="false" onAction="#saveShift" text="Зберегти" styleClass="save-button" prefHeight="35.0" prefWidth="150.0" />
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </center>
+        </BorderPane>
     </children>
-</VBox>
+</AnchorPane>

@@ -105,9 +105,8 @@ public class EmployeeProfileController implements Initializable {
         var sortedSalaries = new ArrayList<>(salaries);
         sortedSalaries.sort(Comparator.comparing(SalaryBO::getStartDate, Comparator.nullsLast(Comparator.naturalOrder())));
 
-        // Use FXCollections.observableArrayList and setItems for best practice
         salaryTable.setItems(FXCollections.observableArrayList(sortedSalaries));
-        salaryTable.getItems().add(new SalaryBO()); // Add empty row for new entries
+        salaryTable.getItems().add(new SalaryBO());
     }
 
     private void setupTableColumns() {

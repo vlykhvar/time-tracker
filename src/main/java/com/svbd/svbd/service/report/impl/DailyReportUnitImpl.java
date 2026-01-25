@@ -2,6 +2,7 @@ package com.svbd.svbd.service.report.impl;
 
 import com.svbd.svbd.dto.report.ReportRequest;
 import com.svbd.svbd.enums.EReportType;
+import com.svbd.svbd.repository.settings.CompanySettingsRepository;
 import com.svbd.svbd.repository.shift.ShiftRepository;
 import com.svbd.svbd.service.report.ReportingUnit;
 import org.apache.poi.ss.usermodel.*;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 
@@ -35,10 +38,12 @@ public class DailyReportUnitImpl implements ReportingUnit {
     private static final String TAXI = "Таксі";
 
     private final ShiftRepository shiftRepository;
+    private final CompanySettingsRepository companySettingsRepository;
 
     @Autowired
-    public DailyReportUnitImpl(ShiftRepository shiftRepository) {
+    public DailyReportUnitImpl(ShiftRepository shiftRepository, CompanySettingsRepository companySettingsRepository) {
         this.shiftRepository = shiftRepository;
+        this.companySettingsRepository = companySettingsRepository;
     }
 
     @Override
@@ -51,6 +56,7 @@ public class DailyReportUnitImpl implements ReportingUnit {
         var date = request.dateFrom();
         var shift = shiftRepository.findByIdWithShiftRows(date)
                 .orElseThrow(() -> new NoSuchElementException("Shift not found for date: " + date));
+        var companyName = companySettingsRepository.getCompanyName();
 
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             var sheet = workbook.createSheet(formatDateForShowing(shift.getShiftDate()));
@@ -67,7 +73,7 @@ public class DailyReportUnitImpl implements ReportingUnit {
             // --- Build Report ---
             Row row = sheet.createRow(0);
             Cell cell = row.createCell(0);
-            cell.setCellValue("Дата зміни " + formatDateForShowing(shift.getShiftDate()));
+            cell.setCellValue("Дата зміни " + formatDateForShowing(shift.getShiftDate()) + ". Підрозділ: " + companyName);
             cell.setCellStyle(titleStyle);
 
             row = sheet.createRow(1);
@@ -143,9 +149,19 @@ public class DailyReportUnitImpl implements ReportingUnit {
             // --- Write to File ---
             var currDir = new File(".");
             var path = currDir.getAbsolutePath();
-            var fileLocation = path.substring(0, path.length() - 1) + "daily.xlsx";
-            try (var outputStream = new FileOutputStream(fileLocation)) {
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String fileName = String.format("%s daily report %s .xls", timestamp, request.dateFrom());
+            var fileLocation = path.substring(0, path.length() - 1) + fileName;
+            var outputStream = new FileOutputStream(fileLocation);
+            try {
                 workbook.write(outputStream);
+                workbook.close();
+                outputStream.close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                workbook.close();
+                outputStream.close();
             }
             return fileLocation;
         }

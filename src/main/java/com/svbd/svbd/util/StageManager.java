@@ -11,7 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.io.InputStream;
 
 /**
  * Service for managing Stages (windows) in a Spring-integrated JavaFX application.
@@ -42,7 +42,14 @@ public class StageManager {
         T controller = fxmlLoader.getController();
 
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/application.css")).toExternalForm());
+        
+        // Load CSS safely
+        var cssUrl = getClass().getResource("/application.css");
+        if (cssUrl != null) {
+            scene.getStylesheets().add(cssUrl.toExternalForm());
+        } else {
+            System.err.println("Warning: application.css not found!");
+        }
 
         return new FxmlLoadResult<>(scene, controller);
     }
@@ -50,7 +57,15 @@ public class StageManager {
     public Stage createModalStage(Scene ownerScene, String title) {
         Stage stage = new Stage();
         stage.setTitle(title);
-        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/Image_Editor.png"))));
+        
+        // Load Icon safely
+        InputStream iconStream = getClass().getResourceAsStream("/Image_Editor.png");
+        if (iconStream != null) {
+            stage.getIcons().add(new Image(iconStream));
+        } else {
+            System.err.println("Warning: Image_Editor.png not found!");
+        }
+
         stage.initOwner(ownerScene.getWindow());
         stage.initModality(Modality.WINDOW_MODAL);
         return stage;
